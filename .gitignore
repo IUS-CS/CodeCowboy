@@ -175,4 +175,5 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-classroom_roster.csv
+*.csv
+.idea

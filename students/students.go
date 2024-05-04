@@ -10,10 +10,12 @@ import (
 )
 
 type Student struct {
-	Identifier     string
+	Name           string
+	ID             string
+	SISLoginID     string
+	Section        string
 	GitHubUsername string
 	GithubID       string
-	Name           string
 }
 
 type Students struct {
@@ -57,13 +59,13 @@ func (s *Students) Save() error {
 }
 
 func (s Student) String() string {
-	return fmt.Sprintf("%s:\t%s", s.GitHubUsername, s.Identifier)
+	return fmt.Sprintf("%s:\t%s", s.GitHubUsername, s.ID)
 }
 
 func (s *Students) String() string {
 	out := "Student list:\n\nGitHub:\tLMS\n"
 	for _, s := range s.Members {
-		out += s.String()
+		out += s.String() + "\n"
 	}
 	if len(s.Members) == 0 {
 		return "No students exist."
