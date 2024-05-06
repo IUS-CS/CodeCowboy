@@ -26,4 +26,5 @@ type GraderFunc func(*store.DB) Grader
 var Graders = map[string]GraderFunc{
 	"go":   NewGoGrader,
 	"java": NewJavaGrader,
+	"net":  NewNetGrader,
 }
