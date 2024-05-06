@@ -24,5 +24,6 @@ func sisNameFromDirName(students *students.Students, dirName string) string {
 type GraderFunc func(*store.DB) Grader
 
 var Graders = map[string]GraderFunc{
-	"go": NewGoGrader,
+	"go":   NewGoGrader,
+	"java": NewJavaGrader,
 }
