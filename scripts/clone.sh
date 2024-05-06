@@ -5,8 +5,6 @@ CMD_PWD=$(pwd)
 CMD="$0"
 CMD_DIR="$(cd "$(dirname "$CMD")" && pwd -P)"
 
-CLASS="$1"
-ASSIGNMENT="$2"
 
 # Basic helpers
 out() { echo "$(TZ=UTC date +%Y-%m-%dT%H:%M:%SZ): $*"; }
@@ -34,12 +32,21 @@ NARGS=-1; while [ "$#" -ne "$NARGS" ]; do NARGS=$#; case $1 in
 		DEBUG=$(( DEBUG + 1 )) && VERBOSE="$DEBUG" && shift && echo "#-INFO: DEBUG=$DEBUG (implies VERBOSE=$VERBOSE)"; ;;
 	-v|--verbose)   # Enable verbose messages
 		VERBOSE=$(( VERBOSE + 1 )) && shift && echo "#-INFO: VERBOSE=$VERBOSE"; ;;
+  --dest)         # Destination directory
+    shift && DEST="$1" && shift && vrb "#-INFO: DEST=$DEST"; ;;
 	*)
 		break;
 esac; done
 
+[ "$DEST" ] || DEST=pwd
+[ $# -gt 0 -a -z "$CLASS" ]  &&  CLASS="$1"  &&  shift
+[ $# -gt 0 -a -z "$ASSIGNMENT" ]  &&  ASSIGNMENT="$1"  &&  shift
 [ "$CLASS" ] || die "You must provide a class"
 [ "$ASSIGNMENT" ] || die "You must provide an assignment"
 
+mkdir -p "$DEST"
+cd "$DEST"
 
 gh classroom clone student-repos -a $(gh classroom assignments -c $(gh classroom list | tail -n +4 | grep "$CLASS" | cut -w -f1)|tail -n +4 | grep "$ASSIGNMENT" | cut -w -f1)
+
+cd "$CMD_PWD"
