@@ -1,4 +1,4 @@
-package grade
+package net
 
 import (
 	"cso/codecowboy/canvasfmt"
@@ -16,7 +16,7 @@ type NetGrader struct {
 	db *store.DB
 }
 
-func NewNetGrader(db *store.DB) Grader {
+func NewNetGrader(db *store.DB) NetGrader {
 	return NetGrader{db}
 }
 
@@ -55,15 +55,15 @@ func (n NetGrader) Grade(repoPath, course, assignment, out string) error {
 		err = cmd.Run()
 
 		wd, _ := os.Getwd()
-		grade, err := readNetTestResults(path.Join(wd, "results.trx"))
+		score, err := readNetTestResults(path.Join(wd, "results.trx"))
 		if err != nil {
 			return err
 		}
 
-		who := sisNameFromDirName(studentList, d.Name())
+		who := canvasfmt.SISNameFromDirName(studentList, d.Name())
 
-		log.Debugf("grade for %s: %.2f", who, grade*100)
-		grades[who] = grade * 100
+		log.Debugf("grade for %s: %.2f", who, score*100)
+		grades[who] = score * 100
 
 		err = os.Chdir(getwd)
 		if err != nil {

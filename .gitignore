@@ -88,10 +88,10 @@ fabric.properties
 *.so
 *.dylib
 
-# Test binary, built with `go test -c`
+# Test binary, built with `golang test -c`
 *.test
 
-# Output of the go coverage tool, specifically when used with LiteIDE
+# Output of the golang coverage tool, specifically when used with LiteIDE
 *.out
 
 # Dependency directories (remove the comment below to include it)
@@ -177,3 +177,5 @@ Temporary Items
 
 *.csv
 .idea
+grade
+mkclassroom

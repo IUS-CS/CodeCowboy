@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 )
 
 const (
@@ -71,4 +72,15 @@ func WriteCSV(out io.Writer, assignment string, students *students.Students, stu
 	}
 	w.Flush()
 	return nil
+}
+
+func SISNameFromDirName(students *students.Students, dirName string) string {
+	fields := strings.Split(dirName, "-")
+	sName := fields[len(fields)-1]
+	for _, s := range students.Members {
+		if s.GitHubUsername == sName {
+			return s.SISLoginID
+		}
+	}
+	return "Unknown"
 }

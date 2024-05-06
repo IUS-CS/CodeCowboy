@@ -1,7 +1,7 @@
 package main
 
 import (
-	"cso/codecowboy/grade"
+	"cso/codecowboy/graders"
 	"cso/codecowboy/store"
 	"flag"
 	"github.com/charmbracelet/log"
@@ -36,12 +36,12 @@ func main() {
 	checkErr(err)
 	defer db.Close()
 
-	graderFunc, ok := grade.Graders[*graderType]
-	if !ok {
+	grader := graders.GetGrader(*graderType, db)
+	if grader == nil {
 		log.Error("Unknown grader type: ", *graderType)
 	}
 
-	checkErr(graderFunc(db).Grade(*dir, *course, *assignment, *out))
+	checkErr(grader.Grade(*dir, *course, *assignment, *out))
 }
 
 func checkErr(err error) {

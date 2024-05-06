@@ -1,4 +1,4 @@
-package grade
+package java
 
 import (
 	"cso/codecowboy/canvasfmt"
@@ -53,15 +53,15 @@ func (j JavaGrader) Grade(repoPath, course, assignment, out string) error {
 		wd, _ := os.Getwd()
 		reportPath := path.Join(wd, "build", "test-results", "test")
 		log.Debug("reading test output", "reportPath", reportPath)
-		grade, err := readJavaTestResults(reportPath)
+		score, err := readJavaTestResults(reportPath)
 		if err != nil {
 			return err
 		}
 
-		who := sisNameFromDirName(studentList, d.Name())
+		who := canvasfmt.SISNameFromDirName(studentList, d.Name())
 
-		log.Debugf("grade for %s: %.2f", who, grade*100)
-		grades[who] = grade * 100
+		log.Debugf("grade for %s: %.2f", who, score*100)
+		grades[who] = score * 100
 
 		err = os.Chdir(getwd)
 		if err != nil {
@@ -85,7 +85,7 @@ func (j JavaGrader) Grade(repoPath, course, assignment, out string) error {
 	return canvasfmt.WriteCSV(w, assignment, studentList, grades)
 }
 
-func NewJavaGrader(db *store.DB) Grader {
+func NewJavaGrader(db *store.DB) JavaGrader {
 	return JavaGrader{db}
 }
 

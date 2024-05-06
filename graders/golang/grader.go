@@ -1,4 +1,4 @@
-package grade
+package golang
 
 import (
 	"cso/codecowboy/canvasfmt"
@@ -17,7 +17,7 @@ type GoGrader struct {
 	db *store.DB
 }
 
-func NewGoGrader(db *store.DB) Grader {
+func NewGoGrader(db *store.DB) GoGrader {
 	return GoGrader{db}
 }
 
@@ -63,11 +63,11 @@ func (g GoGrader) Grade(path, course, assignment, out string) error {
 		fails, _ := g.getKind(outputs, KindFAIL)
 		cover := g.getCoverage(outputs)
 
-		grade := passes / (passes + fails) * 100
-		gradeStr := fmt.Sprintf("%2.1f%%", grade)
-		who := sisNameFromDirName(studentList, d.Name())
+		score := passes / (passes + fails) * 100
+		gradeStr := fmt.Sprintf("%2.1f%%", score)
+		who := canvasfmt.SISNameFromDirName(studentList, d.Name())
 
-		grades[who] = grade
+		grades[who] = score
 
 		log.Info("Finished grading", "user", who, "passes", passes, "fails", fails, "cover", cover, "grade", gradeStr)
 
