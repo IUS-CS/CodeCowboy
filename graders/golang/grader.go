@@ -3,7 +3,6 @@ package golang
 import (
 	"cso/codecowboy/canvasfmt"
 	"cso/codecowboy/store"
-	"cso/codecowboy/students"
 	"encoding/json"
 	"fmt"
 	"github.com/charmbracelet/log"
@@ -22,7 +21,7 @@ func NewGoGrader(db *store.DB) GoGrader {
 }
 
 func (g GoGrader) Grade(path, course, assignment, out string) error {
-	studentList := students.New(g.db, course)
+	studentList := classroom.New(g.db, course)
 
 	getwd, err := os.Getwd()
 	if err != nil {

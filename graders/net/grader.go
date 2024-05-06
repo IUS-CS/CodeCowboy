@@ -3,7 +3,6 @@ package net
 import (
 	"cso/codecowboy/canvasfmt"
 	"cso/codecowboy/store"
-	"cso/codecowboy/students"
 	"encoding/xml"
 	"github.com/charmbracelet/log"
 	"os"
@@ -21,7 +20,7 @@ func NewNetGrader(db *store.DB) NetGrader {
 }
 
 func (n NetGrader) Grade(repoPath, course, assignment, out string) error {
-	studentList := students.New(n.db, course)
+	studentList := classroom.New(n.db, course)
 
 	getwd, err := os.Getwd()
 	if err != nil {

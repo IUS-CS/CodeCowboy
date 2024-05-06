@@ -2,9 +2,9 @@ package main
 
 import (
 	"cso/codecowboy/canvasfmt"
+	"cso/codecowboy/classroom"
 	"cso/codecowboy/githubfmt"
 	"cso/codecowboy/store"
-	"cso/codecowboy/students"
 	"flag"
 	"fmt"
 	"github.com/charmbracelet/log"
@@ -32,7 +32,11 @@ func main() {
 	}
 	defer db.Close()
 
-	roster := students.New(db, *course).Members
+	cls, err := classroom.New(db, *course)
+	if err != nil {
+		log.Fatal(err)
+	}
+	roster := cls.Students
 
 	if *ghPath != "" {
 		roster, err = githubfmt.Parse(*ghPath, roster)
@@ -52,8 +56,8 @@ func main() {
 		log.Debug("Not importing Canvas export")
 	}
 
-	list := students.NewFromList(db, *course, roster)
-	err = list.Save()
+	cls.Students = roster
+	err = cls.Save()
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,7 +1,7 @@
 package githubfmt
 
 import (
-	"cso/codecowboy/students"
+	"cso/codecowboy/classroom"
 	"encoding/csv"
 	"os"
 )
@@ -13,7 +13,7 @@ const (
 	Name
 )
 
-func Parse(path string, current []students.Student) ([]students.Student, error) {
+func Parse(path string, current classroom.Students) (classroom.Students, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -23,15 +23,15 @@ func Parse(path string, current []students.Student) ([]students.Student, error) 
 	if err != nil {
 		return nil, err
 	}
-	canvasMap := make(map[string]students.Student)
+	canvasMap := make(map[string]classroom.Student)
 	for _, s := range current {
 		if s.SISLoginID != "" {
 			canvasMap[s.SISLoginID] = s
 		}
 	}
-	out := []students.Student{}
+	out := []classroom.Student{}
 	for _, r := range records {
-		student := students.Student{
+		student := classroom.Student{
 			SISLoginID:     r[Identifier],
 			GitHubUsername: r[GithubUsername],
 			GithubID:       r[GithubID],
@@ -43,7 +43,7 @@ func Parse(path string, current []students.Student) ([]students.Student, error) 
 	return out, nil
 }
 
-func Update(canvasMap map[string]students.Student, student students.Student) students.Student {
+func Update(canvasMap map[string]classroom.Student, student classroom.Student) classroom.Student {
 	if cs, ok := canvasMap[student.SISLoginID]; ok {
 		student.Name = cs.Name
 		student.ID = cs.ID

@@ -1,7 +1,7 @@
 package canvasfmt
 
 import (
-	"cso/codecowboy/students"
+	"cso/codecowboy/classroom"
 	"encoding/csv"
 	"fmt"
 	"io"
@@ -16,7 +16,7 @@ const (
 	Section
 )
 
-func Parse(path string, current []students.Student) ([]students.Student, error) {
+func Parse(path string, current []classroom.Student) ([]classroom.Student, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -26,18 +26,18 @@ func Parse(path string, current []students.Student) ([]students.Student, error) 
 	if err != nil {
 		return nil, err
 	}
-	ghMap := make(map[string]students.Student)
+	ghMap := make(map[string]classroom.Student)
 	for _, s := range current {
 		if s.SISLoginID != "" {
 			ghMap[s.SISLoginID] = s
 		}
 	}
-	out := make([]students.Student, 0)
+	out := make([]classroom.Student, 0)
 	for i, r := range records {
 		if i < 3 {
 			continue
 		}
-		student := students.Student{
+		student := classroom.Student{
 			Name:       r[Student],
 			ID:         r[ID],
 			SISLoginID: r[SISLoginID],
@@ -49,7 +49,7 @@ func Parse(path string, current []students.Student) ([]students.Student, error) 
 	return out, nil
 }
 
-func Update(ghMap map[string]students.Student, student students.Student) students.Student {
+func Update(ghMap map[string]classroom.Student, student classroom.Student) classroom.Student {
 	if ghs, ok := ghMap[student.SISLoginID]; ok {
 		student.GithubID = ghs.GithubID
 		student.GitHubUsername = ghs.GitHubUsername
@@ -57,13 +57,13 @@ func Update(ghMap map[string]students.Student, student students.Student) student
 	return student
 }
 
-func WriteCSV(out io.Writer, assignment string, students *students.Students, studentGrades map[string]float64) error {
+func WriteCSV(out io.Writer, assignment string, students classroom.Students, studentGrades map[string]float64) error {
 	w := csv.NewWriter(out)
 	err := w.Write([]string{"Student", "ID", "SIS Login ID", "Section", assignment})
 	if err != nil {
 		return err
 	}
-	for _, s := range students.Members {
+	for _, s := range students {
 		grade := fmt.Sprintf("%2.1f", studentGrades[s.SISLoginID])
 		err = w.Write([]string{s.Name, s.ID, s.SISLoginID, s.Section, grade})
 		if err != nil {
@@ -74,10 +74,10 @@ func WriteCSV(out io.Writer, assignment string, students *students.Students, stu
 	return nil
 }
 
-func SISNameFromDirName(students *students.Students, dirName string) string {
+func SISNameFromDirName(students classroom.Students, dirName string) string {
 	fields := strings.Split(dirName, "-")
 	sName := fields[len(fields)-1]
-	for _, s := range students.Members {
+	for _, s := range students {
 		if s.GitHubUsername == sName {
 			return s.SISLoginID
 		}

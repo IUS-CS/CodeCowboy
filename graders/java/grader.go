@@ -3,7 +3,6 @@ package java
 import (
 	"cso/codecowboy/canvasfmt"
 	"cso/codecowboy/store"
-	"cso/codecowboy/students"
 	"encoding/xml"
 	"github.com/charmbracelet/log"
 	"os"
@@ -17,7 +16,7 @@ type JavaGrader struct {
 }
 
 func (j JavaGrader) Grade(repoPath, course, assignment, out string) error {
-	studentList := students.New(j.db, course)
+	studentList := classroom.New(j.db, course)
 
 	getwd, err := os.Getwd()
 	if err != nil {
