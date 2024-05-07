@@ -1,6 +1,7 @@
 package graders
 
 import (
+	"cso/codecowboy/classroom"
 	"cso/codecowboy/graders/golang"
 	"cso/codecowboy/graders/java"
 	"cso/codecowboy/graders/net"
@@ -8,7 +9,7 @@ import (
 )
 
 type Grader interface {
-	Grade(path, course, assignment, out string) error
+	Grade(spec classroom.AssignmentSpec, out string) error
 }
 
 func GetGrader(language string, db *store.DB) Grader {

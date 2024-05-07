@@ -5,9 +5,11 @@ import (
 	"cso/codecowboy/classroom"
 	"cso/codecowboy/githubfmt"
 	"cso/codecowboy/store"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/charmbracelet/log"
+	"os"
 )
 
 const DBNAME = "codecowboy"
@@ -17,6 +19,7 @@ var (
 	ghPath     = flag.String("ghpath", "", "Path to GitHub export")
 	canvasPath = flag.String("canvaspath", "", "Path to Canvas export")
 	debug      = flag.Bool("debug", false, "Enable debug mode")
+	assignPath = flag.String("assignments", "", "Assignments JSON")
 )
 
 func main() {
@@ -54,6 +57,19 @@ func main() {
 		}
 	} else {
 		log.Debug("Not importing Canvas export")
+	}
+
+	if *assignPath != "" {
+		assignments := classroom.Assignments{}
+		data, err := os.ReadFile(*assignPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = json.Unmarshal(data, &assignments)
+		if err != nil {
+			log.Fatal(err)
+		}
+		cls.Assignments = assignments
 	}
 
 	cls.Students = roster

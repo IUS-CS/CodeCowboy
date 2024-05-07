@@ -1,0 +1,59 @@
+package web
+
+templ Header(w *Web, title string) {
+    <head>
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/foundation-sites@6.8.1/dist/css/foundation.min.css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta charset="UTF-8" />
+        if title != "" {
+            <title>{ w.SiteName() } - { title }</title>
+        } else {
+            <title>{ w.SiteName() }</title>
+        }
+    </head>
+}
+
+templ Footer() {
+    <script src="//unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+    <script src="//cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/foundation-sites@6.8.1/dist/js/foundation.min.js"></script>
+}
+
+templ Index(w *Web, title string, contents templ.Component) {
+    <!DOCTYPE html>
+    <html lang="en" class="no-js">
+    @Header(w, title)
+    <body>
+
+    @Nav(w, title)
+
+    if contents != nil {
+        @contents
+    } else {
+        🤠
+    }
+
+    @Footer()
+    </body>
+    </html>
+}
+
+templ Nav(w *Web, currentPage string) {
+
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <ul class="menu">
+                <li><a style="color: black; font-weight: bold;" href="/">{ w.SiteName() }</a></li>
+                for _, item := range w.Navs() {
+                    <li>
+                        if currentPage == item.Name {
+                            <a class="is-active" aria-current="page" href={ templ.URL(item.URL) }>{ item.Name }</a>
+                        } else {
+                            <a href={ templ.URL(item.URL) }>{ item.Name }</a>
+                        }
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+}

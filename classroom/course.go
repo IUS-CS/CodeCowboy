@@ -7,9 +7,10 @@ import (
 )
 
 type Course struct {
-	db       *store.DB
-	Name     string
-	Students Students
+	db          *store.DB
+	Name        string
+	Students    Students
+	Assignments Assignments
 }
 
 func New(db *store.DB, name string) (*Course, error) {

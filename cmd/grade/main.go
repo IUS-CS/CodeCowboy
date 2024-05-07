@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cso/codecowboy/classroom"
 	"cso/codecowboy/graders"
 	"cso/codecowboy/store"
 	"flag"
@@ -41,7 +42,11 @@ func main() {
 		log.Error("Unknown grader type: ", *graderType)
 	}
 
-	checkErr(grader.Grade(*dir, *course, *assignment, *out))
+	checkErr(grader.Grade(classroom.AssignmentSpec{
+		Name:   *assignment,
+		Path:   *dir,
+		Course: *course,
+	}, *out))
 }
 
 func checkErr(err error) {

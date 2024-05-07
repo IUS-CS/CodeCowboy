@@ -2,6 +2,7 @@ package java
 
 import (
 	"cso/codecowboy/canvasfmt"
+	"cso/codecowboy/classroom"
 	"cso/codecowboy/store"
 	"encoding/xml"
 	"github.com/charmbracelet/log"
@@ -15,15 +16,18 @@ type JavaGrader struct {
 	db *store.DB
 }
 
-func (j JavaGrader) Grade(repoPath, course, assignment, out string) error {
-	studentList := classroom.New(j.db, course)
+func (j JavaGrader) Grade(spec classroom.AssignmentSpec, out string) error {
+	studentList, err := classroom.New(j.db, spec.Course)
+	if err != nil {
+		return err
+	}
 
 	getwd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	err = os.Chdir(repoPath)
+	err = os.Chdir(spec.Path)
 
 	list, err := os.ReadDir(".")
 	if err != nil {
@@ -57,7 +61,7 @@ func (j JavaGrader) Grade(repoPath, course, assignment, out string) error {
 			return err
 		}
 
-		who := canvasfmt.SISNameFromDirName(studentList, d.Name())
+		who := canvasfmt.SISNameFromDirName(studentList.Students, d.Name())
 
 		log.Debugf("grade for %s: %.2f", who, score*100)
 		grades[who] = score * 100
@@ -81,7 +85,7 @@ func (j JavaGrader) Grade(repoPath, course, assignment, out string) error {
 		}
 		defer w.Close()
 	}
-	return canvasfmt.WriteCSV(w, assignment, studentList, grades)
+	return canvasfmt.WriteCSV(w, spec.Name, studentList.Students, grades)
 }
 
 func NewJavaGrader(db *store.DB) JavaGrader {

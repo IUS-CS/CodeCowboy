@@ -2,12 +2,15 @@ package golang
 
 import (
 	"cso/codecowboy/canvasfmt"
+	"cso/codecowboy/classroom"
+	util "cso/codecowboy/graders/grader_util"
 	"cso/codecowboy/store"
 	"encoding/json"
 	"fmt"
 	"github.com/charmbracelet/log"
 	"os"
 	"os/exec"
+	"path"
 	"strings"
 	"time"
 )
@@ -20,15 +23,18 @@ func NewGoGrader(db *store.DB) GoGrader {
 	return GoGrader{db}
 }
 
-func (g GoGrader) Grade(path, course, assignment, out string) error {
-	studentList := classroom.New(g.db, course)
+func (g GoGrader) Grade(spec classroom.AssignmentSpec, out string) error {
+	studentList, err := classroom.New(g.db, spec.Course)
+	if err != nil {
+		return err
+	}
 
 	getwd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	err = os.Chdir(path)
+	err = os.Chdir(spec.Path)
 
 	list, err := os.ReadDir(".")
 	if err != nil {
@@ -45,6 +51,13 @@ func (g GoGrader) Grade(path, course, assignment, out string) error {
 		err = os.Chdir(d.Name())
 		if err != nil {
 			return err
+		}
+
+		if spec.ExtrasSrc != "" {
+			err := util.CopyExtras(spec.ExtrasSrc, path.Join(getwd, spec.ExtrasDst))
+			if err != nil {
+				return err
+			}
 		}
 
 		cmd := exec.Command("go", "test", "-cover", "-json")
@@ -64,7 +77,7 @@ func (g GoGrader) Grade(path, course, assignment, out string) error {
 
 		score := passes / (passes + fails) * 100
 		gradeStr := fmt.Sprintf("%2.1f%%", score)
-		who := canvasfmt.SISNameFromDirName(studentList, d.Name())
+		who := canvasfmt.SISNameFromDirName(studentList.Students, d.Name())
 
 		grades[who] = score
 
@@ -89,7 +102,7 @@ func (g GoGrader) Grade(path, course, assignment, out string) error {
 		}
 		defer w.Close()
 	}
-	return canvasfmt.WriteCSV(w, assignment, studentList, grades)
+	return canvasfmt.WriteCSV(w, spec.Name, studentList.Students, grades)
 }
 
 type goTestOutput struct {
