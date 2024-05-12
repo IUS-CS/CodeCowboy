@@ -56,14 +56,19 @@ func (j JavaGrader) Grade(spec classroom.AssignmentSpec, out string) error {
 		wd, _ := os.Getwd()
 		reportPath := path.Join(wd, "build", "test-results", "test")
 		log.Debug("reading test output", "reportPath", reportPath)
-		score, err := readJavaTestResults(reportPath)
+		passes, fails, cover, err := readJavaTestResults(reportPath)
+		if err != nil {
+			return err
+		}
+
+		score, err := spec.Score(passes, fails, cover)
 		if err != nil {
 			return err
 		}
 
 		who := canvasfmt.SISNameFromDirName(studentList.Students, d.Name())
 
-		log.Debugf("grade for %s: %.2f", who, score*100)
+		log.Debugf("grade for %s: %.2f", who, score)
 		grades[who] = score * 100
 
 		err = os.Chdir(getwd)
@@ -119,11 +124,11 @@ type javaTestsuite struct {
 	SystemErr string `xml:"system-err"`
 }
 
-func readJavaTestResults(reportPath string) (float64, error) {
+func readJavaTestResults(reportPath string) (float64, float64, float64, error) {
 	tests, failures := 0.0, 0.0
 	files, err := os.ReadDir(reportPath)
 	if err != nil {
-		return 0, err
+		return 0, 0, 0, err
 	}
 	for _, f := range files {
 		if !strings.HasSuffix(f.Name(), "xml") {
@@ -131,16 +136,16 @@ func readJavaTestResults(reportPath string) (float64, error) {
 		}
 		contents, err := os.ReadFile(path.Join(reportPath, f.Name()))
 		if err != nil {
-			return 0, err
+			return 0, 0, 0, err
 		}
 		suite := javaTestsuite{}
 		err = xml.Unmarshal(contents, &suite)
 		if err != nil {
-			return 0, err
+			return 0, 0, 0, err
 		}
 		tests += float64(suite.Tests)
 		failures += float64(suite.Failures)
 		log.Debug("found test file", "tests", tests, "failures", failures)
 	}
-	return (tests - failures) / tests, nil
+	return tests - failures, failures, 0.0, nil
 }

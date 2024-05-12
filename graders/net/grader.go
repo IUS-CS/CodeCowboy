@@ -58,14 +58,19 @@ func (n NetGrader) Grade(spec classroom.AssignmentSpec, out string) error {
 		err = cmd.Run()
 
 		wd, _ := os.Getwd()
-		score, err := readNetTestResults(path.Join(wd, "results.trx"))
+		passes, fails, cover, err := readNetTestResults(path.Join(wd, "results.trx"))
+		if err != nil {
+			return err
+		}
+
+		score, err := spec.Score(passes, fails, cover)
 		if err != nil {
 			return err
 		}
 
 		who := canvasfmt.SISNameFromDirName(studentList.Students, d.Name())
 
-		log.Debugf("grade for %s: %.2f", who, score*100)
+		log.Debugf("grade for %s: %.2f", who, score)
 		grades[who] = score * 100
 
 		err = os.Chdir(getwd)
@@ -90,19 +95,19 @@ func (n NetGrader) Grade(spec classroom.AssignmentSpec, out string) error {
 	return canvasfmt.WriteCSV(w, spec.Name, studentList.Students, grades)
 }
 
-func readNetTestResults(reportPath string) (float64, error) {
+func readNetTestResults(reportPath string) (float64, float64, float64, error) {
 	contents, err := os.ReadFile(reportPath)
 	if err != nil {
-		return 0, err
+		return 0, 0, 0, err
 	}
 	suite := netTestRun{}
 	err = xml.Unmarshal(contents, &suite)
 	if err != nil {
-		return 0, err
+		return 0, 0, 0, err
 	}
 
 	counters := suite.ResultSummary.Counters
-	return float64(counters.Passed) / float64(counters.Total), nil
+	return float64(counters.Passed), float64(counters.Failed), 0.0, nil
 }
 
 type netTestRun struct {

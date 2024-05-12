@@ -8,10 +8,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/charmbracelet/log"
-	"github.com/expr-lang/expr"
 	"os"
 	"os/exec"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -76,26 +76,15 @@ func (g GoGrader) Grade(spec classroom.AssignmentSpec, out string) error {
 		fails, _ := g.getKind(outputs, KindFAIL)
 		cover := g.getCoverage(outputs)
 
-		env := map[string]interface{}{
-			"passes": passes,
-			"fails":  fails,
-			"cover":  cover,
-		}
-		code := `passes / (passes + fails) * 100`
-		program, err := expr.Compile(code, expr.Env(env))
+		score, err := spec.Score(passes, fails, cover)
 		if err != nil {
-			panic(err)
-		}
-
-		score, err := expr.Run(program, env)
-		if err != nil {
-			panic(err)
+			return err
 		}
 
 		gradeStr := fmt.Sprintf("%2.1f%%", score)
 		who := canvasfmt.SISNameFromDirName(studentList.Students, d.Name())
 
-		grades[who] = score.(float64)
+		grades[who] = score
 
 		log.Info("Finished grading", "user", who, "passes", passes, "fails", fails, "cover", cover, "grade", gradeStr)
 
@@ -147,13 +136,14 @@ func (g GoGrader) fromJSONLines(input string) []goTestOutput {
 	return out
 }
 
-func (g GoGrader) getCoverage(out []goTestOutput) string {
+func (g GoGrader) getCoverage(out []goTestOutput) float64 {
 	for _, o := range out {
 		if o.Action == "output" && strings.Contains(o.Output, "coverage:") {
-			return o.Output
+			out, _ := strconv.ParseFloat(o.Output, 64)
+			return out
 		}
 	}
-	return "coverage: none"
+	return 0.0
 }
 
 const (
