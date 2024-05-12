@@ -3,6 +3,7 @@ module cso/codecowboy
 go 1.22.2
 
 require (
+	github.com/a-h/templ v0.2.680
 	github.com/charmbracelet/charm v0.12.6
 	github.com/charmbracelet/log v0.4.0
 	github.com/dgraph-io/badger/v3 v3.2103.5

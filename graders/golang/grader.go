@@ -1,16 +1,11 @@
 package golang
 
 import (
-	"cso/codecowboy/canvasfmt"
 	"cso/codecowboy/classroom"
 	util "cso/codecowboy/graders/grader_util"
 	"cso/codecowboy/store"
 	"encoding/json"
-	"fmt"
 	"github.com/charmbracelet/log"
-	"os"
-	"os/exec"
-	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -25,89 +20,15 @@ func NewGoGrader(db *store.DB) GoGrader {
 }
 
 func (g GoGrader) Grade(spec classroom.AssignmentSpec, out string) error {
-	studentList, err := classroom.New(g.db, spec.Course)
-	if err != nil {
-		return err
-	}
+	return util.Grade(g.db, []string{"go", "test", "-cover", "-json"}, spec, g.readGoResults, out)
+}
 
-	getwd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-
-	err = os.Chdir(spec.Path)
-
-	list, err := os.ReadDir(".")
-	if err != nil {
-		return err
-	}
-
-	grades := map[string]float64{}
-
-	for _, d := range list {
-		getwd, err := os.Getwd()
-		if err != nil {
-			return err
-		}
-		err = os.Chdir(d.Name())
-		if err != nil {
-			return err
-		}
-
-		if spec.ExtrasSrc != "" {
-			err := util.CopyExtras(spec.ExtrasSrc, path.Join(getwd, spec.ExtrasDst))
-			if err != nil {
-				return err
-			}
-		}
-
-		cmd := exec.Command("go", "test", "-cover", "-json")
-		var stdOut strings.Builder
-		var stdErr strings.Builder
-		cmd.Stdout = &stdOut
-		cmd.Stderr = &stdErr
-		err = cmd.Run()
-		if err != nil && stdErr.Len() > 0 {
-			log.Error("error executing", "stdout", stdOut.String(), "stderr", stdErr.String())
-		}
-
-		outputs := g.fromJSONLines(stdOut.String())
-		passes, _ := g.getKind(outputs, KindPASS)
-		fails, _ := g.getKind(outputs, KindFAIL)
-		cover := g.getCoverage(outputs)
-
-		score, err := spec.Score(passes, fails, cover)
-		if err != nil {
-			return err
-		}
-
-		gradeStr := fmt.Sprintf("%2.1f%%", score)
-		who := canvasfmt.SISNameFromDirName(studentList.Students, d.Name())
-
-		grades[who] = score
-
-		log.Info("Finished grading", "user", who, "passes", passes, "fails", fails, "cover", cover, "grade", gradeStr)
-
-		err = os.Chdir(getwd)
-		if err != nil {
-			return err
-		}
-	}
-
-	err = os.Chdir(getwd)
-	if err != nil {
-		return err
-	}
-
-	w := os.Stdout
-	if out != "stdout" {
-		w, err = os.OpenFile(out, os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			return err
-		}
-		defer w.Close()
-	}
-	return canvasfmt.WriteCSV(w, spec.Name, studentList.Students, grades)
+func (g GoGrader) readGoResults(testOutput string) (float64, float64, float64, error) {
+	outputs := g.fromJSONLines(testOutput)
+	passes, _ := g.getKind(outputs, KindPASS)
+	fails, _ := g.getKind(outputs, KindFAIL)
+	cover := g.getCoverage(outputs)
+	return passes, fails, cover, nil
 }
 
 type goTestOutput struct {

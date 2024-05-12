@@ -1,13 +1,12 @@
 package java
 
 import (
-	"cso/codecowboy/canvasfmt"
 	"cso/codecowboy/classroom"
+	util "cso/codecowboy/graders/grader_util"
 	"cso/codecowboy/store"
 	"encoding/xml"
 	"github.com/charmbracelet/log"
 	"os"
-	"os/exec"
 	"path"
 	"strings"
 )
@@ -17,80 +16,12 @@ type JavaGrader struct {
 }
 
 func (j JavaGrader) Grade(spec classroom.AssignmentSpec, out string) error {
-	studentList, err := classroom.New(j.db, spec.Course)
-	if err != nil {
-		return err
-	}
-
-	getwd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-
-	err = os.Chdir(spec.Path)
-
-	list, err := os.ReadDir(".")
-	if err != nil {
-		return err
-	}
-
-	grades := map[string]float64{}
-
-	for _, d := range list {
-		getwd, err := os.Getwd()
-		if err != nil {
-			return err
-		}
-		err = os.Chdir(d.Name())
-		if err != nil {
-			return err
-		}
-
-		cmd := exec.Command("./gradlew", "test")
-		var stdOut strings.Builder
-		var stdErr strings.Builder
-		cmd.Stdout = &stdOut
-		cmd.Stderr = &stdErr
-		err = cmd.Run()
-
+	return util.Grade(j.db, []string{"./gradlew", "test"}, spec, func(stdOut string) (float64, float64, float64, error) {
 		wd, _ := os.Getwd()
 		reportPath := path.Join(wd, "build", "test-results", "test")
 		log.Debug("reading test output", "reportPath", reportPath)
-		passes, fails, cover, err := readJavaTestResults(reportPath)
-		if err != nil {
-			return err
-		}
-
-		score, err := spec.Score(passes, fails, cover)
-		if err != nil {
-			return err
-		}
-
-		who := canvasfmt.SISNameFromDirName(studentList.Students, d.Name())
-
-		log.Debugf("grade for %s: %.2f", who, score)
-		grades[who] = score * 100
-
-		err = os.Chdir(getwd)
-		if err != nil {
-			return err
-		}
-	}
-
-	err = os.Chdir(getwd)
-	if err != nil {
-		return err
-	}
-
-	w := os.Stdout
-	if out != "stdout" {
-		w, err = os.OpenFile(out, os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			return err
-		}
-		defer w.Close()
-	}
-	return canvasfmt.WriteCSV(w, spec.Name, studentList.Students, grades)
+		return readJavaTestResults(reportPath)
+	}, out)
 }
 
 func NewJavaGrader(db *store.DB) JavaGrader {

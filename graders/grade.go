@@ -23,3 +23,5 @@ func GetGrader(language string, db *store.DB) Grader {
 	}
 	return nil
 }
+
+type TestResult func(stdOut string) (float64, float64, float64, error)
