@@ -3,7 +3,6 @@ module cso/codecowboy
 go 1.22.2
 
 require (
-	github.com/a-h/templ v0.2.680
 	github.com/charmbracelet/charm v0.12.6
 	github.com/charmbracelet/log v0.4.0
 	github.com/dgraph-io/badger/v3 v3.2103.5
@@ -14,7 +13,6 @@ require (
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/caarlos0/env/v6 v6.10.1 // indirect
-	github.com/caarlos0/sshmarshal v0.1.0 // indirect
 	github.com/calmh/randomart v1.1.0 // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -22,7 +20,6 @@ require (
 	github.com/charmbracelet/bubbletea v0.26.2 // indirect
 	github.com/charmbracelet/keygen v0.5.0 // indirect
 	github.com/charmbracelet/lipgloss v0.10.0 // indirect
-	github.com/containerd/console v1.0.4 // indirect
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect

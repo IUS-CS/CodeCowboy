@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/charmbracelet/log"
+	"github.com/expr-lang/expr"
 	"os"
 	"os/exec"
 	"path"
@@ -75,11 +76,26 @@ func (g GoGrader) Grade(spec classroom.AssignmentSpec, out string) error {
 		fails, _ := g.getKind(outputs, KindFAIL)
 		cover := g.getCoverage(outputs)
 
-		score := passes / (passes + fails) * 100
+		env := map[string]interface{}{
+			"passes": passes,
+			"fails":  fails,
+			"cover":  cover,
+		}
+		code := `passes / (passes + fails) * 100`
+		program, err := expr.Compile(code, expr.Env(env))
+		if err != nil {
+			panic(err)
+		}
+
+		score, err := expr.Run(program, env)
+		if err != nil {
+			panic(err)
+		}
+
 		gradeStr := fmt.Sprintf("%2.1f%%", score)
 		who := canvasfmt.SISNameFromDirName(studentList.Students, d.Name())
 
-		grades[who] = score
+		grades[who] = score.(float64)
 
 		log.Info("Finished grading", "user", who, "passes", passes, "fails", fails, "cover", cover, "grade", gradeStr)
 
