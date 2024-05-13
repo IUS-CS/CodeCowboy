@@ -54,7 +54,7 @@ templ (w *Web) assignmentList(course *classroom.Course) {
             <p>No assignments found.</p>
         }
 
-        <p><a href={ templ.URL(fmt.Sprintf("/courses/%s/newAssignment", course.Name)) }>New Assignment</a></p>
+        <p><a href={ templ.URL(fmt.Sprintf("/courses/%s/assignments/newAssignment", course.Name)) }>New Assignment</a></p>
     </div>
 }
 
