@@ -1,6 +1,6 @@
 package web
 
-templ Header(w *Web, title string) {
+templ (w *Web) Header(title string) {
     <head>
         <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/foundation-sites@6.8.1/dist/css/foundation.min.css" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -13,19 +13,19 @@ templ Header(w *Web, title string) {
     </head>
 }
 
-templ Footer() {
+templ (w *Web) Footer() {
     <script src="//unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
     <script src="//cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/foundation-sites@6.8.1/dist/js/foundation.min.js"></script>
 }
 
-templ Index(w *Web, title string, contents templ.Component) {
+templ (w *Web) Index(title string, contents templ.Component) {
     <!DOCTYPE html>
     <html lang="en" class="no-js">
-    @Header(w, title)
+    @w.Header( title)
     <body>
 
-    @Nav(w, title)
+    @w.Nav( title)
 
     if contents != nil {
         @contents
@@ -33,12 +33,12 @@ templ Index(w *Web, title string, contents templ.Component) {
         🤠
     }
 
-    @Footer()
+    @w.Footer()
     </body>
     </html>
 }
 
-templ Nav(w *Web, currentPage string) {
+templ (w *Web) Nav(currentPage string) {
 
     <div class="top-bar">
         <div class="top-bar-left">
@@ -56,4 +56,8 @@ templ Nav(w *Web, currentPage string) {
             </ul>
         </div>
     </div>
+}
+
+templ (w *Web) Error(reason string) {
+    <p>Error: { reason }</p>
 }

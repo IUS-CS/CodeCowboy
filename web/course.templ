@@ -1,0 +1,14 @@
+package web
+
+import (
+	"cso/codecowboy/classroom"
+)
+
+templ (w *Web) courseList(courses []*classroom.Course) {
+    for _, c := range courses {
+        <p>Name: { c.Name }</p>
+    }
+    if len(courses) == 0 {
+        <p>No courses</p>
+    }
+}

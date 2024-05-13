@@ -22,6 +22,22 @@ func New(db *store.DB, name string) (*Course, error) {
 	return c, nil
 }
 
+func All(db *store.DB) ([]*Course, error) {
+	keys, err := db.Keys()
+	if err != nil {
+		return nil, err
+	}
+	courses := []*Course{}
+	for _, k := range keys {
+		course, err := New(db, string(k))
+		if err != nil {
+			return nil, err
+		}
+		courses = append(courses, course)
+	}
+	return courses, nil
+}
+
 func (c *Course) Save() error {
 	return c.db.Set(c.Name, c)
 }
