@@ -1,5 +1,21 @@
 package web
 
 templ (w *Web) dbUtil() {
-    <h1>Import/Export Database</h1>
+    <h1>Database Utils</h1>
+
+    <h2>Import</h2>
+
+    <form hx-post="/db/import" enctype="multipart/form-data">
+        <div>
+            <div>Import JSON:</div>
+            <div class="cell"><input type="file" name="db" accept="application/json"  /></div>
+        </div>
+        <button>Import</button>
+    </form>
+
+    <h2>Export</h2>
+
+    <div>
+        <a role="button" href="/db/export">Export JSON</a>
+    </div>
 }

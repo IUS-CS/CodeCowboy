@@ -23,7 +23,7 @@ func (w *Web) dbUtil() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>Import/Export Database</h1>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>Database Utils</h1><h2>Import</h2><form hx-post=\"/db/import\" enctype=\"multipart/form-data\"><div><div>Import JSON:</div><div class=\"cell\"><input type=\"file\" name=\"db\" accept=\"application/json\"></div></div><button>Import</button></form><h2>Export</h2><div><a role=\"button\" href=\"/db/export\">Export JSON</a></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
