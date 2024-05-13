@@ -1,0 +1,40 @@
+package web
+
+import (
+    "fmt"
+
+	"cso/codecowboy/classroom"
+)
+
+templ (w *Web) assignmentList(course *classroom.Course) {
+    <div id="assignmentList">
+        <ul style="list-style: none">
+            for _, a := range course.Assignments {
+                <li><button type="button" style="padding: 5px">Run</button> <a href={ templ.URL("/courses/"+course.Name+"/assignments/"+a.Name) }>{a.Name}</a></li>
+
+            }
+        </ul>
+
+        if len(course.Assignments) == 0 {
+            <p>No assignments found.</p>
+        }
+
+        <p><a href={ templ.URL(fmt.Sprintf("/courses/%s/assignments/newAssignment", course.Name)) }>New Assignment</a></p>
+    </div>
+}
+
+templ (w *Web) assignmentDetails(assignment classroom.AssignmentSpec) {
+    <h1><a href={ templ.URL(fmt.Sprintf("/courses/%s", assignment.Course)) }>{ assignment.Course }</a>: { assignment.Name }</h1>
+    <p>Path: { assignment.Path }</p>
+    <p>Course: { assignment.Course }</p>
+    <p>Extras source: { assignment.ExtrasSrc }</p>
+    <p>Extras dest:{ assignment.ExtrasDst }</p>
+    <p>Grade expression: <pre>{ assignment.Expr }</pre></p>
+    <div>
+        <button>Run</button>
+        <button class="secondary"
+            style="background-color: red"
+            hx-confirm={ fmt.Sprintf("Are you sure you want to delete %s?", assignment.Name) }
+            hx-delete={ fmt.Sprintf("/courses/%s/assignments/%s", assignment.Course, assignment.Name) }>Delete</button>
+    </div>
+}

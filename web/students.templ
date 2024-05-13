@@ -1,0 +1,50 @@
+package web
+
+import (
+    "fmt"
+
+	"cso/codecowboy/classroom"
+)
+
+templ (w *Web) studentTable(course *classroom.Course) {
+    <div id="studentTable">
+        <table >
+            <thead>
+                <th>#</th>
+                <th>Name</th>
+                <th>SIS ID</th>
+                <th>GitHub ID</th>
+            </thead>
+            for _, s := range course.Students {
+                <tr>
+                    <td>
+                        <button
+                            hx-delete={ fmt.Sprintf("/courses/%s/students/%s", templ.URL(course.Name), templ.URL(s.SISLoginID)) }
+                            hx-target="#studentTable"
+                            class="button tiny"
+                            style="padding: 5px">X</button>
+                    </td>
+                    <td>{ s.Name }</td>
+                    <td>{ s.SISLoginID }</td>
+                    <td>{ s.GitHubUsername }</td>
+                </tr>
+            }
+        </table>
+
+        <p><a href="#" hx-get={ fmt.Sprintf("/courses/%s/students", course.Name) }
+            hx-swap="outerHTML">New Student</a></p>
+    </div>
+}
+
+templ (w *Web) newStudentForm(course *classroom.Course) {
+    <form
+        hx-post={ fmt.Sprintf("/courses/%s/students", course.Name) }
+        hx-target="#studentTable"
+        hx-swap="outerHTML">
+        Name: <input type="text" name="name" />
+        SIS Login: <input type="text" name="sisloginid" />
+        GitHub Username: <input type="text" name="githubusername" />
+        <button>Save</button>
+        <button class="secondary">Cancel</button>
+    </form>
+}

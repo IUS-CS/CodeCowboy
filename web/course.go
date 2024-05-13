@@ -13,6 +13,7 @@ func (w *Web) setupCourseHandlers() chi.Router {
 	router.Get("/", w.handleCourseList)
 	router.Get("/new", w.handleNewCourse)
 	router.Get("/{course}", w.handleCourseDetails)
+	router.Delete("/{course}", w.handleRmCourse)
 
 	router.Mount("/{course}/students", w.setupStudentHandlers())
 	router.Mount("/{course}/assignments", w.setupAssignmentHandlers())
@@ -36,6 +37,15 @@ func (w *Web) handleNewCourse(wr http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Index("New Course", w.courseList(courses)).Render(r.Context(), wr)
+}
+
+func (w *Web) handleRmCourse(wr http.ResponseWriter, r *http.Request) {
+	courseName := chi.URLParam(r, "course")
+	err := w.db.Delete(courseName)
+	if err != nil {
+		w.renderErr(r.Context(), wr, err)
+	}
+	wr.Header().Set("HX-Redirect", "/courses/")
 }
 
 func (w *Web) handleCourseDetails(wr http.ResponseWriter, r *http.Request) {
