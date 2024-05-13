@@ -57,7 +57,7 @@ func main() {
 	}
 
 	if *assignPath != "" {
-		assignments, err := classroom.ParseAssignmentsFile(*assignPath)
+		assignments, err := classroom.ParseAssignmentsFile(*assignPath, cls.Name)
 		if err != nil {
 			log.Fatal(err)
 		}

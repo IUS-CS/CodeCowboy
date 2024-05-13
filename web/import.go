@@ -40,7 +40,7 @@ func (w *Web) handleImportData(wr http.ResponseWriter, r *http.Request) {
 		w.renderErr(r.Context(), wr, err)
 		return
 	} else if !errors.Is(err, http.ErrMissingFile) {
-		assignments, err := classroom.ParseAssignments(file)
+		assignments, err := classroom.ParseAssignments(file, cls.Name)
 		if err != nil {
 			w.renderErr(r.Context(), wr, err)
 			return

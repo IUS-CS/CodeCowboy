@@ -11,15 +11,15 @@ const DEFAULT_EXPR = `passed / (passed+failed)`
 
 type Assignments []AssignmentSpec
 
-func ParseAssignmentsFile(path string) (Assignments, error) {
+func ParseAssignmentsFile(path, courseName string) (Assignments, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	return ParseAssignments(f)
+	return ParseAssignments(f, courseName)
 }
 
-func ParseAssignments(r io.Reader) (Assignments, error) {
+func ParseAssignments(r io.Reader, courseName string) (Assignments, error) {
 	assignments := Assignments{}
 	data, err := io.ReadAll(r)
 	if err != nil {
@@ -28,6 +28,9 @@ func ParseAssignments(r io.Reader) (Assignments, error) {
 	err = json.Unmarshal(data, &assignments)
 	if err != nil {
 		return nil, err
+	}
+	for i := range assignments {
+		assignments[i].Course = courseName
 	}
 	return assignments, nil
 }

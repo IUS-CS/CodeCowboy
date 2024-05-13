@@ -36,7 +36,7 @@ templ (w *Web) Index(title string, contents templ.Component) {
     @w.Nav( title)
 
     <main>
-    <div class="container">
+    <div class="container" id="container">
     if contents != nil {
         @contents
     } else {
