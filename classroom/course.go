@@ -3,6 +3,7 @@ package classroom
 import (
 	"cso/codecowboy/store"
 	"errors"
+	"fmt"
 	"github.com/dgraph-io/badger/v3"
 )
 
@@ -38,7 +39,23 @@ func All(db *store.DB) ([]*Course, error) {
 	return courses, nil
 }
 
+func (c *Course) Validate() error {
+	errs := []error{}
+	if c.Name == "" {
+		errs = append(errs, fmt.Errorf("course name is required"))
+	}
+	for _, s := range c.Students {
+		if err := s.Validate(); err != nil {
+			errs = append(errs, fmt.Errorf("student %s is invalid: %w", s.Name, err))
+		}
+	}
+	return errors.Join(errs...)
+}
+
 func (c *Course) Save() error {
+	if err := c.Validate(); err != nil {
+		return err
+	}
 	return c.db.Set(c.Name, c)
 }
 

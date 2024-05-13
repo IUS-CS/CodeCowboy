@@ -129,6 +129,7 @@ func (w *Web) handleStudentForm(wr http.ResponseWriter, r *http.Request) {
 }
 
 func (w *Web) handleNewStudent(wr http.ResponseWriter, r *http.Request) {
+	// Note: there is no current expectation that the form includes all of these elements
 	student := classroom.Student{
 		Name:           r.FormValue("name"),
 		ID:             r.FormValue("id"),
@@ -136,18 +137,6 @@ func (w *Web) handleNewStudent(wr http.ResponseWriter, r *http.Request) {
 		Section:        r.FormValue("section"),
 		GitHubUsername: r.FormValue("githubusername"),
 		GithubID:       r.FormValue("githubid"),
-	}
-	if student.Name == "" {
-		w.renderErr(r.Context(), wr, fmt.Errorf("student name is required"))
-		return
-	}
-	if student.SISLoginID == "" {
-		w.renderErr(r.Context(), wr, fmt.Errorf("student SIS Login ID is required"))
-		return
-	}
-	if student.GitHubUsername == "" {
-		w.renderErr(r.Context(), wr, fmt.Errorf("student GitHub username is required"))
-		return
 	}
 	cls, err := classroom.New(w.db, chi.URLParam(r, "course"))
 	if err != nil {

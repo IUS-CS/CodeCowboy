@@ -2,6 +2,7 @@ package classroom
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 )
 
@@ -37,4 +38,18 @@ func (s Students) ToJSON() (string, error) {
 		return "", err
 	}
 	return string(out), nil
+}
+
+func (s Student) Validate() error {
+	errs := []error{}
+	if s.Name == "" {
+		errs = append(errs, errors.New("student name is required"))
+	}
+	if s.SISLoginID == "" {
+		errs = append(errs, errors.New("student SISLoginID is required"))
+	}
+	if s.GitHubUsername == "" {
+		errs = append(errs, errors.New("student GitHubUsername is required"))
+	}
+	return errors.Join(errs...)
 }
