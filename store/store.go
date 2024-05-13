@@ -6,27 +6,51 @@ import (
 )
 
 type DB struct {
-	*kv.KV
+	name string
 }
 
 func New(name string) (*DB, error) {
-	db, err := kv.OpenWithDefaults(name)
-	if err != nil {
-		return nil, err
-	}
-	return &DB{db}, nil
+	return &DB{name}, nil
 }
 
 func (db *DB) Set(key string, input any) error {
+	kv, err := kv.OpenWithDefaults(db.name)
+	if err != nil {
+		return err
+	}
+	defer kv.Close()
 	value, err := json.Marshal(input)
 	if err != nil {
 		return err
 	}
-	return db.KV.Set([]byte(key), value)
+	return kv.Set([]byte(key), value)
 }
 
 func (db *DB) Get(key string) ([]byte, error) {
-	return db.KV.Get([]byte(key))
+	kv, err := kv.OpenWithDefaults(db.name)
+	if err != nil {
+		return nil, err
+	}
+	defer kv.Close()
+	return kv.Get([]byte(key))
+}
+
+func (db *DB) Delete(key string) error {
+	kv, err := kv.OpenWithDefaults(db.name)
+	if err != nil {
+		return err
+	}
+	defer kv.Close()
+	return kv.Delete([]byte(key))
+}
+
+func (db *DB) Keys() ([][]byte, error) {
+	kv, err := kv.OpenWithDefaults(db.name)
+	if err != nil {
+		return nil, err
+	}
+	defer kv.Close()
+	return kv.Keys()
 }
 
 func (db *DB) Unmarshal(key string, dest any) error {
@@ -35,4 +59,45 @@ func (db *DB) Unmarshal(key string, dest any) error {
 		return err
 	}
 	return json.Unmarshal(value, dest)
+}
+
+func (db *DB) Export() ([]byte, error) {
+	kv, err := kv.OpenWithDefaults(db.name)
+	if err != nil {
+		return nil, err
+	}
+	defer kv.Close()
+	data := map[string]string{}
+	keys, err := kv.Keys()
+	if err != nil {
+		return nil, err
+	}
+	for _, k := range keys {
+		value, err := kv.Get(k)
+		if err != nil {
+			return nil, err
+		}
+		data[string(k)] = string(value)
+	}
+	out, err := json.Marshal(data)
+	return out, err
+}
+
+func (db *DB) Import(data []byte) error {
+	kv, err := kv.OpenWithDefaults(db.name)
+	if err != nil {
+		return err
+	}
+	defer kv.Close()
+	input := map[string]string{}
+	if err := json.Unmarshal(data, &input); err != nil {
+		return err
+	}
+	for k, v := range input {
+		err = kv.Set([]byte(k), []byte(v))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

@@ -1,14 +1,74 @@
 package web
 
 import (
+    "fmt"
+
 	"cso/codecowboy/classroom"
 )
 
 templ (w *Web) courseList(courses []*classroom.Course) {
-    for _, c := range courses {
-        <p>Name: { c.Name }</p>
-    }
+    <h1>Courses</h1>
+
+    <table>
+        <tr>
+            <th>Course</th>
+            <th>Students</th>
+            <th>Assignments</th>
+        </tr>
+        for _, c := range courses {
+            <tr>
+                <td><a href={ templ.URL("/courses/"+c.Name) }>{ c.Name }</a></td>
+                <td>{ fmt.Sprintf("%d", len(c.Students)) }</td>
+                <td>{ fmt.Sprintf("%d", len(c.Assignments)) }</td>
+            </tr>
+        }
+    </table>
+
     if len(courses) == 0 {
         <p>No courses</p>
     }
+}
+
+templ (w *Web) courseDetails(course *classroom.Course) {
+    <h1>{ course.Name }</h1>
+
+    <h2>Assignments</h2>
+
+    <ul>
+        for _, a := range course.Assignments {
+            <li><a href={ templ.URL("/courses/"+course.Name+"/assignments/"+a.Name) }>{a.Name}</a></li>
+        }
+    </ul>
+
+    if len(course.Assignments) == 0 {
+        <p>No assignments found.</p>
+    }
+
+    <p><a href={ templ.URL(fmt.Sprintf("/courses/%s/newAssignment", course.Name)) }>New Assignment</a></p>
+
+    <h2>Students</h2>
+
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>SIS ID</th>
+            <th>GitHub ID</th>
+        </tr>
+        for _, s := range course.Students {
+            <tr>
+                <td>{ s.Name }</td>
+                <td>{ s.SISLoginID }</td>
+                <td>{ s.GitHubUsername }</td>
+            </tr>
+        }
+    </table>
+}
+
+templ (w *Web) assignmentDetails(assignment classroom.AssignmentSpec) {
+    <h1>{ assignment.Name }</h1>
+    <p>Path: { assignment.Path }</p>
+    <p>Course: { assignment.Course }</p>
+    <p>Extras source: { assignment.ExtrasSrc }</p>
+    <p>Extras dest:{ assignment.ExtrasDst }</p>
+    <p>Grade expression: <pre>{ assignment.Expr }</pre></p>
 }

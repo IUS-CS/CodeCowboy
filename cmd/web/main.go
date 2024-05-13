@@ -18,7 +18,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
 
 	log.Infof("Listening at http://%s", *addr)
 	log.Fatalf("Error: %e", web.New(db, *addr).ListenAndServe())

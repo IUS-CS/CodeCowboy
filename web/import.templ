@@ -1,0 +1,24 @@
+package web
+
+templ (w *Web) importForm() {
+    <h1>Import Course Data</h1>
+    <form hx-post="/import" enctype="multipart/form-data">
+        <div class="grid-x">
+            <div class="cell">Course Name</div>
+            <div class="cell"><input type="text" name="course" /></div>
+        </div>
+        <div class="grid-x">
+            <div class="cell">GitHub export</div>
+            <div class="cell"><input type="file" name="github" accept="text/csv" /></div>
+        </div>
+        <div class="grid-x">
+            <div class="cell">Canvas export</div>
+            <div class="cell"><input type="file" name="canvas" accept="text/csv"  /></div>
+        </div>
+        <div class="grid-x">
+            <div class="cell">Assignments JSON</div>
+            <div class="cell"><input type="file" name="assignments" accept="application/json"  /></div>
+        </div>
+        <button type="submit" class="submit button">Save</button>
+    </form>
+}

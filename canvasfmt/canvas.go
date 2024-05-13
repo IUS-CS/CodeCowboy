@@ -16,12 +16,16 @@ const (
 	Section
 )
 
-func Parse(path string, current []classroom.Student) ([]classroom.Student, error) {
+func ParseFile(path string, current []classroom.Student) ([]classroom.Student, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	reader := csv.NewReader(f)
+	return Parse(f, current)
+}
+
+func Parse(contents io.Reader, current []classroom.Student) ([]classroom.Student, error) {
+	reader := csv.NewReader(contents)
 	records, err := reader.ReadAll()
 	if err != nil {
 		return nil, err

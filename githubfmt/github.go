@@ -3,6 +3,7 @@ package githubfmt
 import (
 	"cso/codecowboy/classroom"
 	"encoding/csv"
+	"io"
 	"os"
 )
 
@@ -13,12 +14,16 @@ const (
 	Name
 )
 
-func Parse(path string, current classroom.Students) (classroom.Students, error) {
+func ParseFile(path string, current classroom.Students) (classroom.Students, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	reader := csv.NewReader(f)
+	return Parse(f, current)
+}
+
+func Parse(r io.Reader, current classroom.Students) (classroom.Students, error) {
+	reader := csv.NewReader(r)
 	records, err := reader.ReadAll()
 	if err != nil {
 		return nil, err

@@ -27,11 +27,15 @@ templ (w *Web) Index(title string, contents templ.Component) {
 
     @w.Nav( title)
 
+    <div class="grid-container">
     if contents != nil {
         @contents
     } else {
-        🤠
+        <div
+            class="text-center"
+            style="font-size: 128px">🤠</div>
     }
+    </div>
 
     @w.Footer()
     </body>

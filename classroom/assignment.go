@@ -1,10 +1,36 @@
 package classroom
 
-import "github.com/expr-lang/expr"
+import (
+	"encoding/json"
+	"github.com/expr-lang/expr"
+	"io"
+	"os"
+)
 
 const DEFAULT_EXPR = `passed / (passed+failed)`
 
 type Assignments []AssignmentSpec
+
+func ParseAssignmentsFile(path string) (Assignments, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAssignments(f)
+}
+
+func ParseAssignments(r io.Reader) (Assignments, error) {
+	assignments := Assignments{}
+	data, err := io.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(data, &assignments)
+	if err != nil {
+		return nil, err
+	}
+	return assignments, nil
+}
 
 func (a AssignmentSpec) Score(passed, failed, cover float64) (float64, error) {
 	env := map[string]any{

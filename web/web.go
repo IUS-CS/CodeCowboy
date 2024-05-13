@@ -1,10 +1,12 @@
 package web
 
 import (
-	"cso/codecowboy/classroom"
-	"cso/codecowboy/store"
-	"github.com/go-chi/chi/v5"
+	"context"
 	"net/http"
+
+	"cso/codecowboy/store"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type Web struct {
@@ -17,7 +19,7 @@ func New(db *store.DB, listenAddr string) *Web {
 }
 
 func (w *Web) SiteName() string {
-	return "CodeCowboy"
+	return "CodeCowboy 🤠"
 }
 
 type NavItem struct {
@@ -26,20 +28,26 @@ type NavItem struct {
 }
 
 func (w *Web) Navs() []NavItem {
-	return nil
+	return []NavItem{
+		{"Courses", "/courses"},
+		{"Import", "/import"},
+		{"DB Utils", "/db"},
+	}
 }
 
 func (w *Web) ListenAndServe() error {
 	router := chi.NewRouter()
-	router.HandleFunc("/", func(wr http.ResponseWriter, r *http.Request) {
-		w.Index("Index", nil).Render(r.Context(), wr)
+	router.Get("/", func(wr http.ResponseWriter, r *http.Request) {
+		http.Redirect(wr, r, "/courses", http.StatusFound)
 	})
-	router.HandleFunc("/courses", func(wr http.ResponseWriter, r *http.Request) {
-		courses, err := classroom.All(w.db)
-		if err != nil {
-			w.Index("Error", w.Error(err.Error())).Render(r.Context(), wr)
-		}
-		w.Index("Courses", w.courseList(courses)).Render(r.Context(), wr)
-	})
+
+	router.Mount("/import", w.setupImportHandlers())
+	router.Mount("/courses", w.setupCourseHandlers())
+	router.Mount("/db", w.setupDBUtilHandlers())
+
 	return http.ListenAndServe(w.listenAddr, router)
+}
+
+func (w *Web) renderErr(ctx context.Context, wr http.ResponseWriter, err error) {
+	w.Error(err.Error()).Render(ctx, wr)
 }

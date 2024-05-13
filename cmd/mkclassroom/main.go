@@ -5,11 +5,9 @@ import (
 	"cso/codecowboy/classroom"
 	"cso/codecowboy/githubfmt"
 	"cso/codecowboy/store"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/charmbracelet/log"
-	"os"
 )
 
 const DBNAME = "codecowboy"
@@ -33,7 +31,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
 
 	cls, err := classroom.New(db, *course)
 	if err != nil {
@@ -42,7 +39,7 @@ func main() {
 	roster := cls.Students
 
 	if *ghPath != "" {
-		roster, err = githubfmt.Parse(*ghPath, roster)
+		roster, err = githubfmt.ParseFile(*ghPath, roster)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -51,7 +48,7 @@ func main() {
 	}
 
 	if *canvasPath != "" {
-		roster, err = canvasfmt.Parse(*canvasPath, roster)
+		roster, err = canvasfmt.ParseFile(*canvasPath, roster)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -60,12 +57,7 @@ func main() {
 	}
 
 	if *assignPath != "" {
-		assignments := classroom.Assignments{}
-		data, err := os.ReadFile(*assignPath)
-		if err != nil {
-			log.Fatal(err)
-		}
-		err = json.Unmarshal(data, &assignments)
+		assignments, err := classroom.ParseAssignmentsFile(*assignPath)
 		if err != nil {
 			log.Fatal(err)
 		}
