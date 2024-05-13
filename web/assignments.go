@@ -61,11 +61,12 @@ func (w *Web) handleRmAssignment(wr http.ResponseWriter, r *http.Request) {
 }
 
 func (w *Web) handleNewAssignmentForm(wr http.ResponseWriter, r *http.Request) {
-	w.Index("New Assignment", nil).Render(r.Context(), wr)
+	courseName := chi.URLParam(r, "course")
+	w.newAssignmentForm(courseName).Render(r.Context(), wr)
 }
 
 func (w *Web) handleNewAssignment(wr http.ResponseWriter, r *http.Request) {
-	cls, err := classroom.New(w.db, r.FormValue("course"))
+	cls, err := classroom.New(w.db, chi.URLParam(r, "course"))
 	if err != nil {
 		w.renderErr(r.Context(), wr, err)
 		return
