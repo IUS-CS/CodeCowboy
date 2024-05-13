@@ -9,7 +9,7 @@ import (
 templ (w *Web) courseList(courses []*classroom.Course) {
     <h1>Courses</h1>
 
-    <table>
+    <table class="table-auto">
         <tr>
             <th>Course</th>
             <th>Students</th>
@@ -34,9 +34,10 @@ templ (w *Web) courseDetails(course *classroom.Course) {
 
     <h2>Assignments</h2>
 
-    <ul>
+    <ul style="list-style: none">
         for _, a := range course.Assignments {
-            <li><a href={ templ.URL("/courses/"+course.Name+"/assignments/"+a.Name) }>{a.Name}</a></li>
+            <li><button type="button" style="padding: 5px">Run</button> <a href={ templ.URL("/courses/"+course.Name+"/assignments/"+a.Name) }>{a.Name}</a></li>
+
         }
     </ul>
 
@@ -49,19 +50,23 @@ templ (w *Web) courseDetails(course *classroom.Course) {
     <h2>Students</h2>
 
     <table>
-        <tr>
+        <thead>
+            <th>#</th>
             <th>Name</th>
             <th>SIS ID</th>
             <th>GitHub ID</th>
-        </tr>
+        </thead>
         for _, s := range course.Students {
             <tr>
+                <td><button class="button tiny" style="padding: 5px">X</button></td>
                 <td>{ s.Name }</td>
                 <td>{ s.SISLoginID }</td>
                 <td>{ s.GitHubUsername }</td>
             </tr>
         }
     </table>
+
+    <p><a href={ templ.URL(fmt.Sprintf("/courses/%s/newStudent", course.Name)) }>New Student</a></p>
 }
 
 templ (w *Web) assignmentDetails(assignment classroom.AssignmentSpec) {
@@ -71,4 +76,7 @@ templ (w *Web) assignmentDetails(assignment classroom.AssignmentSpec) {
     <p>Extras source: { assignment.ExtrasSrc }</p>
     <p>Extras dest:{ assignment.ExtrasDst }</p>
     <p>Grade expression: <pre>{ assignment.Expr }</pre></p>
+    <div class="grid-x">
+        <div class="cell"><button class="button tiny" style="vertical-align: top">Run</button></div>
+    </div>
 }

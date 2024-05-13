@@ -2,7 +2,6 @@ package web
 
 templ (w *Web) Header(title string) {
     <head>
-        <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/foundation-sites@6.8.1/dist/css/foundation.min.css" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta charset="UTF-8" />
         if title != "" {
@@ -10,13 +9,22 @@ templ (w *Web) Header(title string) {
         } else {
             <title>{ w.SiteName() }</title>
         }
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+        />
+        <style>
+        .navTitle {
+            text-style: none;
+            color: var(--pico-h1-color);
+        }
+        </style>
     </head>
 }
 
 templ (w *Web) Footer() {
+    <footer></footer>
     <script src="//unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
-    <script src="//cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/foundation-sites@6.8.1/dist/js/foundation.min.js"></script>
 }
 
 templ (w *Web) Index(title string, contents templ.Component) {
@@ -27,7 +35,8 @@ templ (w *Web) Index(title string, contents templ.Component) {
 
     @w.Nav( title)
 
-    <div class="grid-container">
+    <main>
+    <div class="container">
     if contents != nil {
         @contents
     } else {
@@ -36,6 +45,7 @@ templ (w *Web) Index(title string, contents templ.Component) {
             style="font-size: 128px">🤠</div>
     }
     </div>
+    </main>
 
     @w.Footer()
     </body>
@@ -43,23 +53,24 @@ templ (w *Web) Index(title string, contents templ.Component) {
 }
 
 templ (w *Web) Nav(currentPage string) {
-
-    <div class="top-bar">
-        <div class="top-bar-left">
-            <ul class="menu">
-                <li><a style="color: black; font-weight: bold;" href="/">{ w.SiteName() }</a></li>
-                for _, item := range w.Navs() {
-                    <li>
-                        if currentPage == item.Name {
-                            <a class="is-active" aria-current="page" href={ templ.URL(item.URL) }>{ item.Name }</a>
-                        } else {
-                            <a href={ templ.URL(item.URL) }>{ item.Name }</a>
-                        }
-                    </li>
+    <header>
+    <nav style="margin-right: 2em; margin-left: 2em">
+      <ul>
+        <li><strong><a href="/" class="navTitle">{ w.SiteName() }</a></strong></li>
+      </ul>
+      <ul>
+        for _, item := range w.Navs() {
+            <li>
+                if currentPage == item.Name {
+                    <a class="is-active" aria-current="page" href={ templ.URL(item.URL) }>{ item.Name }</a>
+                } else {
+                    <a href={ templ.URL(item.URL) }>{ item.Name }</a>
                 }
-            </ul>
-        </div>
-    </div>
+            </li>
+        }
+      </ul>
+    </nav>
+    </header>
 }
 
 templ (w *Web) Error(reason string) {
