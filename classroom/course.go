@@ -4,7 +4,6 @@ import (
 	"cso/codecowboy/store"
 	"errors"
 	"fmt"
-	"github.com/dgraph-io/badger/v3"
 )
 
 type Course struct {
@@ -61,7 +60,8 @@ func (c *Course) Save() error {
 
 func (c *Course) Populate() error {
 	err := c.db.Unmarshal(c.Name, c)
-	if !errors.Is(err, badger.ErrKeyNotFound) && err != nil {
+	notFoundError := store.ErrKeyNotFound{}
+	if !errors.As(err, &notFoundError) && err != nil {
 		return err
 	}
 	return nil

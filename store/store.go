@@ -2,8 +2,20 @@ package store
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"github.com/charmbracelet/charm/kv"
+	"github.com/dgraph-io/badger/v3"
 )
+
+type ErrKeyNotFound struct {
+	key string
+	err error
+}
+
+func (e ErrKeyNotFound) Error() string {
+	return fmt.Sprintf("key %s not found, %v", e.key, e.err)
+}
 
 type DB struct {
 	name string
@@ -55,6 +67,9 @@ func (db *DB) Keys() ([][]byte, error) {
 
 func (db *DB) Unmarshal(key string, dest any) error {
 	value, err := db.Get(key)
+	if errors.Is(err, badger.ErrKeyNotFound) {
+		return ErrKeyNotFound{key, err}
+	}
 	if err != nil {
 		return err
 	}
