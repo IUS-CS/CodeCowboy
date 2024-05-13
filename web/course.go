@@ -18,6 +18,7 @@ func (w *Web) setupCourseHandlers() chi.Router {
 	router.Post("/{course}/students", w.handleNewStudent)
 	router.Get("/{course}/students", w.handleStudentForm)
 	router.Get("/{course}/assignments/{assignment}", w.handleAssignmentDetails)
+	router.Delete("/{course}/assignments/{assignment}", w.handleRmAssignment)
 	router.Post("/{course}/assignments", w.handleNewAssignment)
 	return router
 }
@@ -67,6 +68,29 @@ func (w *Web) handleAssignmentDetails(wr http.ResponseWriter, r *http.Request) {
 		}
 	}
 	w.renderErr(r.Context(), wr, fmt.Errorf("could not find assignment"))
+}
+
+func (w *Web) handleRmAssignment(wr http.ResponseWriter, r *http.Request) {
+	assignmentName := chi.URLParam(r, "assignment")
+	courseName := chi.URLParam(r, "course")
+	cls, err := classroom.New(w.db, courseName)
+	if err != nil {
+		w.renderErr(r.Context(), wr, err)
+		return
+	}
+	assignments := classroom.Assignments{}
+	for _, a := range cls.Assignments {
+		if a.Name != assignmentName {
+			assignments = append(assignments, a)
+		}
+	}
+	cls.Assignments = assignments
+	err = cls.Save()
+	if err != nil {
+		w.renderErr(r.Context(), wr, err)
+		return
+	}
+	wr.Header().Set("HX-Redirect", "/courses/"+cls.Name)
 }
 
 func (w *Web) handleNewAssignment(wr http.ResponseWriter, r *http.Request) {

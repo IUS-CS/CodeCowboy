@@ -2,6 +2,7 @@ package web
 
 import (
 	"context"
+	"github.com/charmbracelet/log"
 	"net/http"
 
 	"cso/codecowboy/store"
@@ -49,5 +50,6 @@ func (w *Web) ListenAndServe() error {
 }
 
 func (w *Web) renderErr(ctx context.Context, wr http.ResponseWriter, err error) {
+	log.Error("Controller error", "err", err)
 	w.Error(err.Error()).Render(ctx, wr)
 }
