@@ -2,7 +2,7 @@
 
 This program executes GitHub Classroom repositories and outputs usable CSV for Canvas/SIS grade imports.
 
-## Usage
+## Overview
 
 Usage comes to three steps:
 
@@ -14,6 +14,22 @@ Usage comes to three steps:
 ### Database
 
 The database used throughout this project is [Charm KV](https://github.com/charmbracelet/charm#charm-kv). You should self-host your own Charm server: [Charm Self Hosting](https://github.com/charmbracelet/charm#self-hosting). In addition, you may want [Skate](https://github.com/charmbracelet/skate) to inspect your database.
+
+## Web
+
+Requirements:
+
+- Linux/MacOS shell (with `/bin/sh`)
+- [GitHub CLI](https://cli.github.com) `gh` utility
+- Authenticate with `gh auth login`
+- CLI [Classroom extension](https://docs.github.com/en/education/manage-coursework-with-github-classroom/teach-with-github-classroom/using-github-classroom-with-github-cli)
+  - Install with `gh extension install github/gh-classroom`
+- Canvas student export
+- GitHub classroom student export
+
+Run with cmd/web. This is an unauthenticated service automatically running unverified student code. Be careful.
+
+## Commandline
 
 ### Creating a classroom
 
