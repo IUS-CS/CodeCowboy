@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/charmbracelet/log"
 	cp "github.com/otiai10/copy"
+	"io"
 	"os"
 	"os/exec"
 	"path"
@@ -28,7 +29,7 @@ func CopyExtras(from string, to string) error {
 	return nil
 }
 
-func Grade(db *store.DB, command []string, spec classroom.AssignmentSpec, testResult graders.TestResult, out string) error {
+func Grade(db *store.DB, command []string, spec classroom.AssignmentSpec, testResult graders.TestResult, out io.Writer) error {
 	studentList, err := classroom.New(db, spec.Course)
 	if err != nil {
 		return err
@@ -103,13 +104,5 @@ func Grade(db *store.DB, command []string, spec classroom.AssignmentSpec, testRe
 		return err
 	}
 
-	w := os.Stdout
-	if out != "stdout" {
-		w, err = os.OpenFile(out, os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			return err
-		}
-		defer w.Close()
-	}
-	return canvasfmt.WriteCSV(w, spec.Name, studentList.Students, grades)
+	return canvasfmt.WriteCSV(out, spec.Name, studentList.Students, grades)
 }

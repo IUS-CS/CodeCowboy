@@ -35,18 +35,23 @@ func main() {
 
 	db, err := store.New(DBNAME)
 	checkErr(err)
-	defer db.Close()
 
 	grader := graders.GetGrader(*graderType, db)
 	if grader == nil {
 		log.Error("Unknown grader type: ", *graderType)
 	}
 
+	w := os.Stdout
+	if *out != "stdout" && *out != "" {
+		w, err = os.Open(*out)
+		checkErr(err)
+	}
+
 	checkErr(grader.Grade(classroom.AssignmentSpec{
 		Name:   *assignment,
 		Path:   *dir,
 		Course: *course,
-	}, *out))
+	}, w))
 }
 
 func checkErr(err error) {

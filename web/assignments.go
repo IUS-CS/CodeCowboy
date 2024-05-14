@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"net/http"
+	"time"
 )
 
 func (w *Web) setupAssignmentHandlers() chi.Router {
@@ -13,6 +14,7 @@ func (w *Web) setupAssignmentHandlers() chi.Router {
 	router.Get("/newAssignment", w.handleNewAssignmentForm)
 	router.Get("/{assignment}", w.handleAssignmentDetails)
 	router.Delete("/{assignment}", w.handleRmAssignment)
+	router.Post("/{assignment}/run", w.handleRunAssignment)
 	router.Post("/", w.handleNewAssignment)
 
 	return router
@@ -73,6 +75,7 @@ func (w *Web) handleNewAssignment(wr http.ResponseWriter, r *http.Request) {
 	}
 	assign := classroom.AssignmentSpec{
 		Name:      r.FormValue("name"),
+		GitHubID:  r.FormValue("GitHubID"),
 		Path:      r.FormValue("path"),
 		Course:    cls.Name,
 		ExtrasSrc: r.FormValue("extrasSrc"),
@@ -91,3 +94,40 @@ func (w *Web) handleNewAssignment(wr http.ResponseWriter, r *http.Request) {
 	wr.Header().Set("HX-Redirect", "/courses/"+cls.Name)
 	w.courseDetails(cls).Render(r.Context(), wr)
 }
+
+func (w *Web) handleRunAssignment(wr http.ResponseWriter, r *http.Request) {
+	course := chi.URLParam(r, "course")
+	assignment := chi.URLParam(r, "assignment")
+	cls, err := classroom.New(w.db, course)
+	if err != nil {
+		w.renderErr(r.Context(), wr, err)
+		return
+	}
+	for _, a := range cls.Assignments {
+		if a.Name == assignment {
+			out, err := a.CloneAndRun(func() (string, error) {
+				return "", nil //run(w.db, a)
+			})
+			if err != nil {
+				w.renderErr(r.Context(), wr, err)
+			}
+			wr.Header().Set("Content-Disposition",
+				fmt.Sprintf("attachment; filename=grade_%s_%s_%s.json",
+					a.Course, a.Name, time.Now().Format(time.RFC3339)))
+			wr.Header().Set("Content-Type", "text/csv")
+			wr.Write([]byte(out))
+		}
+	}
+	w.renderErr(r.Context(), wr, fmt.Errorf("could not find assignment"))
+}
+
+// func run(db *store.DB, a classroom.AssignmentSpec) (string, error) {
+// 	grader := graders.GetGrader(a.Type, db)
+// 	if grader == nil {
+// 		return "", fmt.Errorf("unknown grader type: %s", a.Type)
+// 	}
+//
+// 	out := bytes.NewBuffer([]byte{})
+// 	err := grader.Grade(a, out)
+// 	return out.String(), err
+// }

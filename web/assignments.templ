@@ -10,7 +10,9 @@ templ (w *Web) assignmentList(course *classroom.Course) {
     <div id="assignmentList">
         <ul style="list-style: none">
             for _, a := range course.Assignments {
-                <li><button type="button" style="padding: 5px">Run</button> <a href={ templ.URL("/courses/"+course.Name+"/assignments/"+a.Name) }>{a.Name}</a></li>
+                <li><a role="button" style="padding: 5px"
+                    href={ templ.URL(fmt.Sprintf("/courses/"+course.Name+"/assignments/"+a.Name+"/run")) }>Run</a>
+                    <a href={ templ.URL("/courses/"+course.Name+"/assignments/"+a.Name) }>{a.Name}</a></li>
 
             }
         </ul>
@@ -46,11 +48,12 @@ templ (w *Web) newAssignmentForm(courseName string) {
     <form
         hx-post={ fmt.Sprintf("/courses/%s/assignments", courseName) }
         hx-target="#assignmentList">
-        <p>Name: <input type="text" name="name" /></p>
-        <p>Path: <input type="text" name="path" /></p>
-        <p>Extras source: <input type="text" name="extrasSrc" /></p>
-        <p>Extras dest: <input type="text" name="extrasDst" /></p>
-        <p>Grade expression: <input type="text" name="expr" /></p>
+        <p>Name: <input type="text" name="name" required /></p>
+        <p>GitHub Assignment ID: <input type="text" name="GitHubID" required /></p>
+        <p>Path: <input type="text" name="path" placeholder="This will be filled by the gh repo clone" /></p>
+        <p>Extras source: <input type="text" name="extrasSrc" placeholder="Disk path to your extra tests" /></p>
+        <p>Extras dest: <input type="text" name="extrasDst" value="/" /></p>
+        <p>Grade expression: <input type="text" name="expr" value={ classroom.DEFAULT_EXPR } /></p>
         <div>
             <button>Save</button>
         </div>

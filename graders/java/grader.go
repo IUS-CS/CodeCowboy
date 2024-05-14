@@ -6,6 +6,7 @@ import (
 	"cso/codecowboy/store"
 	"encoding/xml"
 	"github.com/charmbracelet/log"
+	"io"
 	"os"
 	"path"
 	"strings"
@@ -15,7 +16,7 @@ type JavaGrader struct {
 	db *store.DB
 }
 
-func (j JavaGrader) Grade(spec classroom.AssignmentSpec, out string) error {
+func (j JavaGrader) Grade(spec classroom.AssignmentSpec, out io.Writer) error {
 	return util.Grade(j.db, []string{"./gradlew", "test"}, spec, func(stdOut string) (float64, float64, float64, error) {
 		wd, _ := os.Getwd()
 		reportPath := path.Join(wd, "build", "test-results", "test")

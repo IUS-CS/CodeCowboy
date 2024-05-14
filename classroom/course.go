@@ -43,6 +43,11 @@ func (c *Course) Validate() error {
 	if c.Name == "" {
 		errs = append(errs, fmt.Errorf("course name is required"))
 	}
+	for _, a := range c.Assignments {
+		if err := a.Validate(); err != nil {
+			errs = append(errs, fmt.Errorf("assignment %s validation failed: %w", a.Name, err))
+		}
+	}
 	for _, s := range c.Students {
 		if err := s.Validate(); err != nil {
 			errs = append(errs, fmt.Errorf("student %s is invalid: %w", s.Name, err))

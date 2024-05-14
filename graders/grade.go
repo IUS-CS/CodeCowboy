@@ -6,10 +6,11 @@ import (
 	"cso/codecowboy/graders/java"
 	"cso/codecowboy/graders/net"
 	"cso/codecowboy/store"
+	"io"
 )
 
 type Grader interface {
-	Grade(spec classroom.AssignmentSpec, out string) error
+	Grade(spec classroom.AssignmentSpec, out io.Writer) error
 }
 
 func GetGrader(language string, db *store.DB) Grader {

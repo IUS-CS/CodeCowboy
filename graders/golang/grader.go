@@ -6,6 +6,7 @@ import (
 	"cso/codecowboy/store"
 	"encoding/json"
 	"github.com/charmbracelet/log"
+	"io"
 	"strconv"
 	"strings"
 	"time"
@@ -19,7 +20,7 @@ func NewGoGrader(db *store.DB) GoGrader {
 	return GoGrader{db}
 }
 
-func (g GoGrader) Grade(spec classroom.AssignmentSpec, out string) error {
+func (g GoGrader) Grade(spec classroom.AssignmentSpec, out io.Writer) error {
 	return util.Grade(g.db, []string{"go", "test", "-cover", "-json"}, spec, g.readGoResults, out)
 }
 

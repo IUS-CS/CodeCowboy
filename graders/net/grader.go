@@ -5,6 +5,7 @@ import (
 	util "cso/codecowboy/graders/grader_util"
 	"cso/codecowboy/store"
 	"encoding/xml"
+	"io"
 	"os"
 	"path"
 )
@@ -17,7 +18,7 @@ func NewNetGrader(db *store.DB) NetGrader {
 	return NetGrader{db}
 }
 
-func (n NetGrader) Grade(spec classroom.AssignmentSpec, out string) error {
+func (n NetGrader) Grade(spec classroom.AssignmentSpec, out io.Writer) error {
 	return util.Grade(n.db, []string{"dotnet", "test", "--logger", "trx;logfilename=../../results.trx"}, spec, func(stdOut string) (float64, float64, float64, error) {
 		wd, _ := os.Getwd()
 		reportPath := path.Join(wd, "results.trx")
