@@ -10,9 +10,10 @@ templ (w *Web) assignmentList(course *classroom.Course) {
     <div id="assignmentList">
         <ul style="list-style: none">
             for _, a := range course.Assignments {
-                <li><a role="button" style="padding: 5px"
-                    href={ templ.URL(fmt.Sprintf("/courses/"+course.Name+"/assignments/"+a.Name+"/run")) }>Run</a>
-                    <a href={ templ.URL("/courses/"+course.Name+"/assignments/"+a.Name) }>{a.Name}</a></li>
+                <li>
+                    <button style="padding: 5px" hx-post={ fmt.Sprintf("/courses/"+course.Name+"/assignments/"+a.Name+"/run") }>Run</button>
+                    <a href={ templ.URL("/courses/"+course.Name+"/assignments/"+a.Name) }>{a.Name}</a>
+                </li>
 
             }
         </ul>
@@ -36,11 +37,42 @@ templ (w *Web) assignmentDetails(assignment classroom.AssignmentSpec) {
     <p>Extras dest:{ assignment.ExtrasDst }</p>
     <p>Grade expression: <pre>{ assignment.Expr }</pre></p>
     <div>
-        <button>Run</button>
+        <button hx-post={ fmt.Sprintf("/courses/"+assignment.Course+"/assignments/"+assignment.Name+"/run") }>Run</button>
         <button class="secondary"
             style="background-color: red"
             hx-confirm={ fmt.Sprintf("Are you sure you want to delete %s?", assignment.Name) }
             hx-delete={ fmt.Sprintf("/courses/%s/assignments/%s", assignment.Course, assignment.Name) }>Delete</button>
+    </div>
+
+    @w.listExecutions(assignment.Course, assignment.Name, map[string]string{})
+
+    <div id="resultView"></div>
+}
+
+templ (w *Web) viewResult(result string) {
+    <div style="margin: 1em;">
+        <pre>{ result }</pre>
+        <button hx-get="/" hx-swap="delete" hx-target="#resultView div">Close</button>
+    </div>
+}
+
+templ (w *Web) listExecutions(course, assignment string, executions map[string]string) {
+    <div hx-get={ fmt.Sprintf("/courses/%s/assignments/%s/status", course, assignment) } hx-trigger="load delay:2s">
+    if len(executions) > 0 {
+        <div>
+        for id, status := range executions {
+            if status == STATUS_RUNNING {
+                { id }: Running
+            } else {
+                <a href={ templ.URL(fmt.Sprintf("/courses/%s/assignments/%s/download/%s",
+                    course, assignment, id)) }>{ id }</a>: Complete (<a href=""
+                        hx-get={ fmt.Sprintf("/courses/%s/assignments/%s/view/%s",
+                            course, assignment, id) }
+                            hx-target="#resultView">view</a>)
+            }
+        }
+        </div>
+    }
     </div>
 }
 
@@ -49,7 +81,12 @@ templ (w *Web) newAssignmentForm(courseName string) {
         hx-post={ fmt.Sprintf("/courses/%s/assignments", courseName) }
         hx-target="#assignmentList">
         <p>Name: <input type="text" name="name" required /></p>
-        <p>GitHub Assignment ID: <input type="text" name="GitHubID" required /></p>
+        <p>Type: <select name="type" required>
+            <option selected disabled value="">Select a target language</option>
+            <option value="java">Java</option>
+            <option value="net">.NET</option>
+            <option value="go">Go</option>
+        </select></p>
         <p>Path: <input type="text" name="path" placeholder="This will be filled by the gh repo clone" /></p>
         <p>Extras source: <input type="text" name="extrasSrc" placeholder="Disk path to your extra tests" /></p>
         <p>Extras dest: <input type="text" name="extrasDst" value="/" /></p>

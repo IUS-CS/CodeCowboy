@@ -13,10 +13,12 @@ import (
 type Web struct {
 	listenAddr string
 	db         *store.DB
+
+	runLog map[string]map[string]string
 }
 
 func New(db *store.DB, listenAddr string) *Web {
-	return &Web{db: db, listenAddr: listenAddr}
+	return &Web{db: db, listenAddr: listenAddr, runLog: map[string]map[string]string{}}
 }
 
 func (w *Web) SiteName() string {

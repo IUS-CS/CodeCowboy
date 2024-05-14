@@ -3,7 +3,6 @@ package util
 import (
 	"cso/codecowboy/canvasfmt"
 	"cso/codecowboy/classroom"
-	"cso/codecowboy/graders"
 	"cso/codecowboy/store"
 	"fmt"
 	"github.com/charmbracelet/log"
@@ -29,7 +28,9 @@ func CopyExtras(from string, to string) error {
 	return nil
 }
 
-func Grade(db *store.DB, command []string, spec classroom.AssignmentSpec, testResult graders.TestResult, out io.Writer) error {
+type TestResult func(stdOut string) (float64, float64, float64, error)
+
+func Grade(db *store.DB, command []string, spec classroom.AssignmentSpec, testResult TestResult, out io.Writer) error {
 	studentList, err := classroom.New(db, spec.Course)
 	if err != nil {
 		return err

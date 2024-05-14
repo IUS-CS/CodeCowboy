@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -17,6 +18,16 @@ const DEFAULT_EXPR = `passed / (passed+failed)`
 var Languages = []string{"go", "java", "net"}
 
 type Assignments []AssignmentSpec
+
+type AssignmentSpec struct {
+	Name      string
+	Type      string
+	Path      string
+	Course    string
+	ExtrasSrc string
+	ExtrasDst string
+	Expr      string
+}
 
 func ParseAssignmentsFile(path, courseName string) (Assignments, error) {
 	f, err := os.Open(path)
@@ -62,17 +73,6 @@ func (a AssignmentSpec) Score(passed, failed, cover float64) (float64, error) {
 	return result.(float64), nil
 }
 
-type AssignmentSpec struct {
-	Name      string
-	GitHubID  string
-	Type      string
-	Path      string
-	Course    string
-	ExtrasSrc string
-	ExtrasDst string
-	Expr      string
-}
-
 func in(input string, list []string) bool {
 	for _, e := range list {
 		if input == e {
@@ -87,9 +87,6 @@ func (a AssignmentSpec) Validate() error {
 	if !in(a.Type, Languages) {
 		errs = append(errs, fmt.Errorf("language type %s not found", a.Type))
 	}
-	if a.GitHubID == "" {
-		errs = append(errs, fmt.Errorf("missing GitHub Assignment ID"))
-	}
 	if a.Name == "" {
 		errs = append(errs, fmt.Errorf("missing assignment name"))
 	}
@@ -97,6 +94,7 @@ func (a AssignmentSpec) Validate() error {
 }
 
 var cloner = `gh classroom clone student-repos -d "%s" -a $(gh classroom assignments -c $(gh classroom list | tail -n +4 | grep "%s" | cut -w -f1)|tail -n +4 | grep "%s" | cut -w -f1)`
+var assignmentName = `gh classroom assignments -c $(gh classroom list | tail -n +4 | grep "%s" | cut -w -f1)|tail -n +4 | grep "%s" | cut -w -f2`
 
 func stripDanger(input string) string {
 	strips := []string{";", "&", "!"}
@@ -106,23 +104,53 @@ func stripDanger(input string) string {
 	return input
 }
 
-func (a AssignmentSpec) CloneAndRun(runner func() (string, error)) (string, error) {
+func (a AssignmentSpec) CloneAndRun(runner func(string) (string, error)) (string, error) {
 	if err := a.Validate(); err != nil {
 		return "", err
 	}
-	path, err := os.MkdirTemp("", "*-repos")
+	tmpPath, err := os.MkdirTemp("", "*-repos")
 	if err != nil {
 		return "", err
 	}
-	defer os.RemoveAll(path)
-	log.Debugf("Created tmp dir: %s", path)
-	clone := fmt.Sprintf(cloner, path, stripDanger(a.Course), stripDanger(a.Name))
-	log.Debugf("Running command: %s", clone)
-	cmd := exec.Command("sh -c", clone)
+	defer os.RemoveAll(tmpPath)
+	wd, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	defer os.Chdir(wd)
+	os.Chdir(tmpPath)
+	log.Debugf("Created tmp dir: %s", tmpPath)
+	fmtCmd := fmt.Sprintf(cloner, tmpPath, stripDanger(a.Course), stripDanger(a.Name))
+	log.Debugf("Running command: %s", fmtCmd)
+	cmd := exec.Command("/bin/sh", "-c", fmtCmd)
 	if err = cmd.Run(); err != nil {
 		return "", err
 	}
-	output, err := runner()
+	fmtCmd = fmt.Sprintf(assignmentName, stripDanger(a.Course), stripDanger(a.Name))
+	cmd = exec.Command("/bin/sh", "-c", fmtCmd)
+	log.Debugf("Running command: %s", cmd.String())
+	stdOut := strings.Builder{}
+	cmd.Stdout = &stdOut
+	if err = cmd.Run(); err != nil {
+		return "", err
+	}
+	log.Debugf("result: %s", stdOut.String())
+	ghAssignmentName := strings.ToLower(strings.TrimSpace(stdOut.String()))
+	dir, err := os.ReadDir(".")
+	if err != nil {
+		return "", err
+	}
+	var assnPath string
+	for _, d := range dir {
+		log.Debugf("Inspecting %s similar to %s", d.Name(), ghAssignmentName)
+		if strings.HasPrefix(d.Name(), ghAssignmentName) && strings.HasSuffix(d.Name(), "-submissions") {
+			assnPath = filepath.Join(tmpPath, d.Name())
+		}
+	}
+	if assnPath == "" {
+		return "", fmt.Errorf("assignment path not found: %s/%s-submissions", tmpPath, ghAssignmentName)
+	}
+	output, err := runner(assnPath)
 	if err != nil {
 		return "", err
 	}
