@@ -44,7 +44,7 @@ func (w *Web) handleAssignmentDetails(wr http.ResponseWriter, r *http.Request) {
 			if a.Expr == "" {
 				a.Expr = classroom.DEFAULT_EXPR
 			}
-			w.Index(assignmentName, w.assignmentDetails(a)).Render(r.Context(), wr)
+			w.Index(assignmentName, w.assignmentDetails(a, w.runLog[courseName+assignmentName])).Render(r.Context(), wr)
 			return
 		}
 	}
@@ -133,8 +133,7 @@ func (w *Web) handleRunAssignment(wr http.ResponseWriter, r *http.Request) {
 					w.runLog[course+assignment][id] = out
 				}
 			}()
-			wr.Header().Set("HX-Redirect", "/courses/"+cls.Name+"/assignments/"+assignment)
-			w.assignmentDetails(a).Render(r.Context(), wr)
+			wr.Header().Set("HX-Location", "/courses/"+cls.Name+"/assignments/"+assignment)
 			return
 		}
 	}
@@ -175,7 +174,7 @@ func (w *Web) handleDownloadResult(wr http.ResponseWriter, r *http.Request) {
 		return
 	}
 	wr.Header().Set("Content-Disposition",
-		fmt.Sprintf("attachment; filename=grade_%s_%s_%s.json",
+		fmt.Sprintf("attachment; filename=grade_%s_%s_%s.csv",
 			course, assignment, time.Now().Format(time.RFC3339)))
 	wr.Header().Set("Content-Type", "text/csv")
 	wr.Write([]byte(w.runLog[course+assignment][id]))

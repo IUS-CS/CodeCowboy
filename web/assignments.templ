@@ -29,7 +29,7 @@ templ (w *Web) assignmentList(course *classroom.Course) {
     </div>
 }
 
-templ (w *Web) assignmentDetails(assignment classroom.AssignmentSpec) {
+templ (w *Web) assignmentDetails(assignment classroom.AssignmentSpec, executions map[string]string) {
     <h1><a href={ templ.URL(fmt.Sprintf("/courses/%s", assignment.Course)) }>{ assignment.Course }</a>: { assignment.Name }</h1>
     <p>Path: { assignment.Path }</p>
     <p>Course: { assignment.Course }</p>
@@ -37,29 +37,39 @@ templ (w *Web) assignmentDetails(assignment classroom.AssignmentSpec) {
     <p>Extras dest:{ assignment.ExtrasDst }</p>
     <p>Grade expression: <pre>{ assignment.Expr }</pre></p>
     <div>
-        <button hx-post={ fmt.Sprintf("/courses/"+assignment.Course+"/assignments/"+assignment.Name+"/run") }>Run</button>
+        <button
+            hx-post={ fmt.Sprintf("/courses/"+assignment.Course+"/assignments/"+assignment.Name+"/run") }>Run</button>
         <button class="secondary"
             style="background-color: red"
             hx-confirm={ fmt.Sprintf("Are you sure you want to delete %s?", assignment.Name) }
             hx-delete={ fmt.Sprintf("/courses/%s/assignments/%s", assignment.Course, assignment.Name) }>Delete</button>
     </div>
 
-    @w.listExecutions(assignment.Course, assignment.Name, map[string]string{})
+    <div>
+        @w.listExecutions(assignment.Course, assignment.Name, executions)
+    </div>
 
     <div id="resultView"></div>
 }
 
 templ (w *Web) viewResult(result string) {
-    <div style="margin: 1em;">
-        <pre>{ result }</pre>
-        <button hx-get="/" hx-swap="delete" hx-target="#resultView div">Close</button>
+    <div style="margin: 1em;" id="resultView">
+        <div>
+            <pre>{ result }</pre>
+            <button hx-get="/" hx-swap="delete" hx-target="#resultView div">Close</button>
+        </div>
     </div>
 }
 
 templ (w *Web) listExecutions(course, assignment string, executions map[string]string) {
-    <div hx-get={ fmt.Sprintf("/courses/%s/assignments/%s/status", course, assignment) } hx-trigger="load delay:2s">
+    <div
+        style="margin-top: 1em"
+        hx-get={ fmt.Sprintf("/courses/%s/assignments/%s/status", course, assignment) }
+        hx-target="this"
+        hx-swap="outerHTML" hx-trigger="load delay:5s">
     if len(executions) > 0 {
         <div>
+        <h2>Executions</h2>
         for id, status := range executions {
             if status == STATUS_RUNNING {
                 { id }: Running
