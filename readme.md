@@ -84,6 +84,54 @@ Example:
 
 `-dir=./student-repositories/assignment1-submissions -course=cowboytest -assignment="Assignment 1 (123)" -type=net`
 
+## Tasks
+
+### Generate
+
+Generates templates.
+
+```
+go generate
+```
+
+### Web
+
+Build the webserver.
+
+requires: Generate
+
+```
+go build -o server cmd/web/main.go
+```
+
+### Serve
+
+Run the webserver.
+
+requires: Web
+
+```
+./server
+```
+
+### MkClassroom
+
+Build the classroom import tool.
+
+```
+go build -o mkclassroom cmd/mkclassroom/main.go
+```
+
+### Import
+
+Imports example classroom assuming example files exist.
+
+requires: MkClassroom
+
+```
+./mkclassroom -canvaspath=example/CowboyTest_canvas.csv -ghpath=example/classroom_roster.csv -assignments=example/cowboytest_assign.json -course=cowboytest
+```
+
 ## Is it good?
 
 I think it's sufficient.
