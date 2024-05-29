@@ -4,14 +4,16 @@ import (
 	"cso/codecowboy/store"
 	"cso/codecowboy/web"
 	"flag"
+
 	"github.com/charmbracelet/log"
 )
 
 const DBNAME = "codecowboy"
 
 var (
-	addr  = flag.String("addr", "127.0.0.1:8080", "http service address")
-	debug = flag.Bool("debug", false, "Enable debug mode")
+	addr   = flag.String("addr", "127.0.0.1:8080", "http service address")
+	debug  = flag.Bool("debug", false, "Enable debug mode")
+	dbPath = flag.String("path", "codecowboy.db", "db path")
 )
 
 func main() {
@@ -21,7 +23,7 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 	}
 
-	db, err := store.New(DBNAME)
+	db, err := store.New(*dbPath, DBNAME)
 	if err != nil {
 		log.Fatal(err)
 	}

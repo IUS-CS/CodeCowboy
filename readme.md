@@ -111,7 +111,7 @@ Run the webserver.
 requires: Web
 
 ```
-./server
+./server -addr="tar-mac:8080"
 ```
 
 ### MkClassroom

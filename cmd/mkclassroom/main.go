@@ -7,6 +7,7 @@ import (
 	"cso/codecowboy/store"
 	"flag"
 	"fmt"
+
 	"github.com/charmbracelet/log"
 )
 
@@ -18,6 +19,7 @@ var (
 	canvasPath = flag.String("canvaspath", "", "Path to Canvas export")
 	debug      = flag.Bool("debug", false, "Enable debug mode")
 	assignPath = flag.String("assignments", "", "Assignments JSON")
+	dbPath     = flag.String("path", "codecowboy.db", "db path")
 )
 
 func main() {
@@ -27,21 +29,21 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 	}
 
-	db, err := store.New(DBNAME)
+	db, err := store.New(*dbPath, DBNAME)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("store.New", err)
 	}
 
 	cls, err := classroom.New(db, *course)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("classroom.New", err)
 	}
 	roster := cls.Students
 
 	if *ghPath != "" {
 		roster, err = githubfmt.ParseFile(*ghPath, roster)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal("ghfmt", err)
 		}
 	} else {
 		log.Debug("Not importing GitHub")
@@ -50,7 +52,7 @@ func main() {
 	if *canvasPath != "" {
 		roster, err = canvasfmt.ParseFile(*canvasPath, roster)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal("canvasfmt", err)
 		}
 	} else {
 		log.Debug("Not importing Canvas export")
@@ -59,7 +61,7 @@ func main() {
 	if *assignPath != "" {
 		assignments, err := classroom.ParseAssignmentsFile(*assignPath, cls.Name)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal("Assignments:", err)
 		}
 		cls.Assignments = assignments
 	}
@@ -67,7 +69,7 @@ func main() {
 	cls.Students = roster
 	err = cls.Save()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("cls.Save", err)
 	}
 	fmt.Printf("%d students saved\n", len(roster))
 }

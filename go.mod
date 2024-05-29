@@ -49,6 +49,7 @@ require (
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
+	go.etcd.io/bbolt v1.3.10 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/crypto v0.23.0 // indirect
 	golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842 // indirect

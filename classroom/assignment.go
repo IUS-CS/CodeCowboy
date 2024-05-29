@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/charmbracelet/log"
-	"github.com/expr-lang/expr"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/charmbracelet/log"
+	"github.com/expr-lang/expr"
 )
 
 const DEFAULT_EXPR = `passed / (passed+failed)`
@@ -32,7 +33,7 @@ type AssignmentSpec struct {
 func ParseAssignmentsFile(path, courseName string) (Assignments, error) {
 	f, err := os.Open(path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ParseAssignmentsOpen: %w", err)
 	}
 	return ParseAssignments(f, courseName)
 }
@@ -41,11 +42,11 @@ func ParseAssignments(r io.Reader, courseName string) (Assignments, error) {
 	assignments := Assignments{}
 	data, err := io.ReadAll(r)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ParseAssignments ReadAll: %w", err)
 	}
 	err = json.Unmarshal(data, &assignments)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ParseAssignments Unmarshal: %w", err)
 	}
 	for i := range assignments {
 		assignments[i].Course = courseName

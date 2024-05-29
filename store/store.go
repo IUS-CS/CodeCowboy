@@ -2,10 +2,9 @@ package store
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	"github.com/charmbracelet/charm/kv"
-	"github.com/dgraph-io/badger/v3"
+
+	bolt "go.etcd.io/bbolt"
 )
 
 type ErrKeyNotFound struct {
@@ -18,15 +17,28 @@ func (e ErrKeyNotFound) Error() string {
 }
 
 type DB struct {
-	name string
+	path   string
+	bucket []byte
 }
 
-func New(name string) (*DB, error) {
-	return &DB{name}, nil
+func New(path, bucket string) (*DB, error) {
+	db := &DB{path, []byte(bucket)}
+	kv, err := bolt.Open(db.path, 0600, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer kv.Close()
+	if err = kv.Update(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists(db.bucket)
+		return err
+	}); err != nil {
+		return nil, err
+	}
+	return db, nil
 }
 
 func (db *DB) Set(key string, input any) error {
-	kv, err := kv.OpenWithDefaults(db.name)
+	kv, err := bolt.Open(db.path, 0600, nil)
 	if err != nil {
 		return err
 	}
@@ -35,71 +47,100 @@ func (db *DB) Set(key string, input any) error {
 	if err != nil {
 		return err
 	}
-	return kv.Set([]byte(key), value)
+	return kv.Update(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists(db.bucket)
+		if err != nil {
+			return err
+		}
+		return b.Put([]byte(key), value)
+	})
 }
 
 func (db *DB) Get(key string) ([]byte, error) {
-	kv, err := kv.OpenWithDefaults(db.name)
+	kv, err := bolt.Open(db.path, 0600, nil)
 	if err != nil {
 		return nil, err
 	}
 	defer kv.Close()
-	return kv.Get([]byte(key))
+	out := []byte{}
+	err = kv.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket(db.bucket)
+		out = b.Get([]byte(key))
+		return nil
+	})
+	return out, err
 }
 
 func (db *DB) Delete(key string) error {
-	kv, err := kv.OpenWithDefaults(db.name)
+	kv, err := bolt.Open(db.path, 0600, nil)
 	if err != nil {
 		return err
 	}
 	defer kv.Close()
-	return kv.Delete([]byte(key))
+	return kv.Update(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists(db.bucket)
+		if err != nil {
+			return err
+		}
+		err = b.Delete([]byte(key))
+		return err
+	})
 }
 
 func (db *DB) Keys() ([][]byte, error) {
-	kv, err := kv.OpenWithDefaults(db.name)
+	kv, err := bolt.Open(db.path, 0600, nil)
 	if err != nil {
 		return nil, err
 	}
 	defer kv.Close()
-	return kv.Keys()
+	keys := [][]byte{}
+	err = kv.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket(db.bucket)
+		return b.ForEach(func(k, v []byte) error {
+			keys = append(keys, k)
+			return nil
+		})
+	})
+	return keys, err
 }
 
 func (db *DB) Unmarshal(key string, dest any) error {
 	value, err := db.Get(key)
-	if errors.Is(err, badger.ErrKeyNotFound) {
-		return ErrKeyNotFound{key, err}
-	}
 	if err != nil {
 		return err
+	}
+	if len(value) == 0 {
+		return ErrKeyNotFound{key, fmt.Errorf("not found")}
 	}
 	return json.Unmarshal(value, dest)
 }
 
 func (db *DB) Export() ([]byte, error) {
-	kv, err := kv.OpenWithDefaults(db.name)
+	kv, err := bolt.Open(db.path, 0600, nil)
 	if err != nil {
 		return nil, err
 	}
 	defer kv.Close()
 	data := map[string]string{}
-	keys, err := kv.Keys()
+	err = kv.View(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists(db.bucket)
+		if err != nil {
+			return err
+		}
+		return b.ForEach(func(k, v []byte) error {
+			data[string(k)] = string(v)
+			return nil
+		})
+	})
 	if err != nil {
 		return nil, err
-	}
-	for _, k := range keys {
-		value, err := kv.Get(k)
-		if err != nil {
-			return nil, err
-		}
-		data[string(k)] = string(value)
 	}
 	out, err := json.Marshal(data)
 	return out, err
 }
 
 func (db *DB) Import(data []byte) error {
-	kv, err := kv.OpenWithDefaults(db.name)
+	kv, err := bolt.Open(db.path, 0600, nil)
 	if err != nil {
 		return err
 	}
@@ -108,11 +149,17 @@ func (db *DB) Import(data []byte) error {
 	if err := json.Unmarshal(data, &input); err != nil {
 		return err
 	}
-	for k, v := range input {
-		err = kv.Set([]byte(k), []byte(v))
+	return kv.Update(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists(db.bucket)
 		if err != nil {
 			return err
 		}
-	}
-	return nil
+		for k, v := range input {
+			err = b.Put([]byte(k), []byte(v))
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
