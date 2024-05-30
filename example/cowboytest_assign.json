@@ -1,3 +1,9 @@
 [
-	{"Name": "Assignment 1", "Course": "cowboytest", "ExtrasSrc": "/Users/cwsexton/src/cso/codecowboy/teacher_tests/cowboytest/assignment1", "ExtrasDst": "/", "Language": "go"}
+	{
+	  "Name": "Assignment 1",
+	  "Course": "cowboytest",
+	  "ExtrasSrc": "/Users/cwsexton/src/cso/codecowboy/teacher_tests/cowboytest/assignment1",
+	  "ExtrasDst": "/",
+	  "Type": "go"
+	}
 ]

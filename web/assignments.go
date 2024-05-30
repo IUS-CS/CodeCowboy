@@ -110,6 +110,11 @@ func (w *Web) handleNewAssignment(wr http.ResponseWriter, r *http.Request) {
 func (w *Web) handleRunAssignment(wr http.ResponseWriter, r *http.Request) {
 	course := chi.URLParam(r, "course")
 	assignment := chi.URLParam(r, "assignment")
+	rawDueDate := r.FormValue("duedate")
+	dueDate, err := time.Parse(time.DateTime, rawDueDate)
+	if err != nil {
+		dueDate = time.Now()
+	}
 	cls, err := classroom.New(w.db, course)
 	if err != nil {
 		w.renderErr(r.Context(), wr, err)
@@ -123,9 +128,9 @@ func (w *Web) handleRunAssignment(wr http.ResponseWriter, r *http.Request) {
 					w.runLog[course+assignment] = map[string]string{}
 				}
 				w.runLog[course+assignment][id] = STATUS_RUNNING
-				out, err := a.CloneAndRun(func(path string) (string, error) {
+				out, timeLate, err := a.CloneAndRun(dueDate, func(path string) (string, error) {
 					a.Path = path
-					return run(w.db, a)
+					return run(w.db, a, timeLate)
 				})
 				if err != nil {
 					w.runLog[course+assignment][id] = err.Error()
@@ -180,7 +185,7 @@ func (w *Web) handleDownloadResult(wr http.ResponseWriter, r *http.Request) {
 	wr.Write([]byte(w.runLog[course+assignment][id]))
 }
 
-func run(db *store.DB, a classroom.AssignmentSpec) (string, error) {
+func run(db *store.DB, a classroom.AssignmentSpec, timeLate time.Duration) (string, error) {
 
 	var grader Grader
 
@@ -197,10 +202,10 @@ func run(db *store.DB, a classroom.AssignmentSpec) (string, error) {
 	}
 
 	out := bytes.NewBuffer([]byte{})
-	err := grader.Grade(a, out)
+	err := grader.Grade(a, timeLate, out)
 	return out.String(), err
 }
 
 type Grader interface {
-	Grade(spec classroom.AssignmentSpec, out io.Writer) error
+	Grade(spec classroom.AssignmentSpec, timeLate time.Duration, out io.Writer) error
 }

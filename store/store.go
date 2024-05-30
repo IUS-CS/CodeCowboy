@@ -122,7 +122,7 @@ func (db *DB) Export() ([]byte, error) {
 	}
 	defer kv.Close()
 	data := map[string]string{}
-	err = kv.View(func(tx *bolt.Tx) error {
+	err = kv.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists(db.bucket)
 		if err != nil {
 			return err

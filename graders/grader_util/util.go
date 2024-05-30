@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"path"
 	"strings"
+	"time"
 )
 
 func CopyExtras(from string, to string) error {
@@ -28,7 +29,7 @@ func CopyExtras(from string, to string) error {
 	return nil
 }
 
-type TestResult func(stdOut string) (float64, float64, float64, error)
+type TestResult func(stdOut string) (float64, float64, float64, time.Duration, error)
 
 func Grade(db *store.DB, command []string, spec classroom.AssignmentSpec, testResult TestResult, out io.Writer) error {
 	studentList, err := classroom.New(db, spec.Course)
@@ -77,12 +78,12 @@ func Grade(db *store.DB, command []string, spec classroom.AssignmentSpec, testRe
 			log.Error("error executing", "stdout", stdOut.String(), "stderr", stdErr.String())
 		}
 
-		passes, fails, cover, err := testResult(stdOut.String())
+		passes, fails, cover, timeLate, err := testResult(stdOut.String())
 		if err != nil {
 			return err
 		}
 
-		score, err := spec.Score(passes, fails, cover)
+		score, err := spec.Score(passes, fails, cover, timeLate)
 		if err != nil {
 			return err
 		}

@@ -1,6 +1,7 @@
 package classroom
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -8,7 +9,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/log"
 	"github.com/expr-lang/expr"
@@ -54,11 +57,12 @@ func ParseAssignments(r io.Reader, courseName string) (Assignments, error) {
 	return assignments, nil
 }
 
-func (a AssignmentSpec) Score(passed, failed, cover float64) (float64, error) {
+func (a AssignmentSpec) Score(passed, failed, cover float64, timeLate time.Duration) (float64, error) {
 	env := map[string]any{
 		"passed": passed,
 		"failed": failed,
 		"cover":  cover,
+		"late":   timeLate,
 	}
 	if a.Expr == "" {
 		a.Expr = DEFAULT_EXPR
@@ -105,27 +109,70 @@ func stripDanger(input string) string {
 	return input
 }
 
-func (a AssignmentSpec) CloneAndRun(runner func(string) (string, error)) (string, error) {
+var emptyTime = time.Duration(0)
+
+func (a AssignmentSpec) checkSubmissionDate(path string, dueDate time.Time) (time.Duration, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return emptyTime, err
+	}
+	defer os.Chdir(wd)
+	err = os.Chdir(path)
+	if err != nil {
+		return emptyTime, err
+	}
+	cmd := exec.Command("git", "log", "-1", "--format=\"%at\"")
+	stdout := &bytes.Buffer{}
+	stderr := &bytes.Buffer{}
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
+	err = cmd.Run()
+	if err != nil {
+		return emptyTime, err
+	}
+	if stderr.Len() == 0 {
+		return emptyTime, fmt.Errorf("error getting commit time: %s", stderr.String())
+	}
+	tstamp, err := strconv.ParseInt(stdout.String(), 10, 64)
+	if err != nil {
+		return emptyTime, err
+	}
+	commitTime := time.UnixMicro(tstamp)
+	return commitTime.Sub(dueDate), nil
+}
+
+func errReturn(err error) (string, time.Duration, error) {
+	return "", time.Duration(0), err
+}
+
+func (a AssignmentSpec) CloneAndRun(dueDate time.Time, runner func(string) (string, error)) (string, time.Duration, error) {
 	if err := a.Validate(); err != nil {
-		return "", err
+		return errReturn(err)
 	}
 	tmpPath, err := os.MkdirTemp("", "*-repos")
 	if err != nil {
-		return "", err
+		return errReturn(err)
 	}
 	defer os.RemoveAll(tmpPath)
 	wd, err := os.Getwd()
 	if err != nil {
-		return "", err
+		return errReturn(err)
 	}
 	defer os.Chdir(wd)
-	os.Chdir(tmpPath)
+	err = os.Chdir(tmpPath)
+	if err != nil {
+		return errReturn(err)
+	}
+	delta, err := a.checkSubmissionDate(".", dueDate)
+	if err != nil {
+		return errReturn(err)
+	}
 	log.Debugf("Created tmp dir: %s", tmpPath)
 	fmtCmd := fmt.Sprintf(cloner, tmpPath, stripDanger(a.Course), stripDanger(a.Name))
 	log.Debugf("Running command: %s", fmtCmd)
 	cmd := exec.Command("/bin/sh", "-c", fmtCmd)
 	if err = cmd.Run(); err != nil {
-		return "", err
+		return errReturn(err)
 	}
 	fmtCmd = fmt.Sprintf(assignmentName, stripDanger(a.Course), stripDanger(a.Name))
 	cmd = exec.Command("/bin/sh", "-c", fmtCmd)
@@ -133,13 +180,13 @@ func (a AssignmentSpec) CloneAndRun(runner func(string) (string, error)) (string
 	stdOut := strings.Builder{}
 	cmd.Stdout = &stdOut
 	if err = cmd.Run(); err != nil {
-		return "", err
+		return errReturn(err)
 	}
 	log.Debugf("result: %s", stdOut.String())
 	ghAssignmentName := strings.ToLower(strings.TrimSpace(stdOut.String()))
 	dir, err := os.ReadDir(".")
 	if err != nil {
-		return "", err
+		return errReturn(err)
 	}
 	var assnPath string
 	for _, d := range dir {
@@ -149,11 +196,11 @@ func (a AssignmentSpec) CloneAndRun(runner func(string) (string, error)) (string
 		}
 	}
 	if assnPath == "" {
-		return "", fmt.Errorf("assignment path not found: %s/%s-submissions", tmpPath, ghAssignmentName)
+		return errReturn(fmt.Errorf("assignment path not found: %s/%s-submissions", tmpPath, ghAssignmentName))
 	}
 	output, err := runner(assnPath)
 	if err != nil {
-		return "", err
+		return errReturn(err)
 	}
-	return output, nil
+	return output, delta, nil
 }

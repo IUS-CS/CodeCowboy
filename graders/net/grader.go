@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"time"
 )
 
 type NetGrader struct {
@@ -18,27 +19,27 @@ func NewNetGrader(db *store.DB) NetGrader {
 	return NetGrader{db}
 }
 
-func (n NetGrader) Grade(spec classroom.AssignmentSpec, out io.Writer) error {
-	return util.Grade(n.db, []string{"dotnet", "test", "--logger", "trx;logfilename=../../results.trx"}, spec, func(stdOut string) (float64, float64, float64, error) {
+func (n NetGrader) Grade(spec classroom.AssignmentSpec, timeLate time.Duration, out io.Writer) error {
+	return util.Grade(n.db, []string{"dotnet", "test", "--logger", "trx;logfilename=../../results.trx"}, spec, func(stdOut string) (float64, float64, float64, time.Duration, error) {
 		wd, _ := os.Getwd()
 		reportPath := path.Join(wd, "results.trx")
-		return readNetTestResults(reportPath)
+		return readNetTestResults(reportPath, timeLate)
 	}, out)
 }
 
-func readNetTestResults(reportPath string) (float64, float64, float64, error) {
+func readNetTestResults(reportPath string, timeLate time.Duration) (float64, float64, float64, time.Duration, error) {
 	contents, err := os.ReadFile(reportPath)
 	if err != nil {
-		return 0, 0, 0, err
+		return 0, 0, 0, time.Duration(0), err
 	}
 	suite := netTestRun{}
 	err = xml.Unmarshal(contents, &suite)
 	if err != nil {
-		return 0, 0, 0, err
+		return 0, 0, 0, time.Duration(0), err
 	}
 
 	counters := suite.ResultSummary.Counters
-	return float64(counters.Passed), float64(counters.Failed), 0.0, nil
+	return float64(counters.Passed), float64(counters.Failed), 0.0, timeLate, nil
 }
 
 type netTestRun struct {

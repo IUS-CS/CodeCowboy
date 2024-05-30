@@ -20,16 +20,16 @@ func NewGoGrader(db *store.DB) GoGrader {
 	return GoGrader{db}
 }
 
-func (g GoGrader) Grade(spec classroom.AssignmentSpec, out io.Writer) error {
+func (g GoGrader) Grade(spec classroom.AssignmentSpec, timeLate time.Duration, out io.Writer) error {
 	return util.Grade(g.db, []string{"go", "test", "-cover", "-json"}, spec, g.readGoResults, out)
 }
 
-func (g GoGrader) readGoResults(testOutput string) (float64, float64, float64, error) {
+func (g GoGrader) readGoResults(testOutput string, timeLate time.Duration) (float64, float64, float64, time.Duration, error) {
 	outputs := g.fromJSONLines(testOutput)
 	passes, _ := g.getKind(outputs, KindPASS)
 	fails, _ := g.getKind(outputs, KindFAIL)
 	cover := g.getCoverage(outputs)
-	return passes, fails, cover, nil
+	return passes, fails, cover, timeLate, nil
 }
 
 type goTestOutput struct {
