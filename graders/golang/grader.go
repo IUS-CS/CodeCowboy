@@ -21,7 +21,7 @@ func NewGoGrader(db *store.DB) GoGrader {
 }
 
 func (g GoGrader) Grade(spec classroom.AssignmentSpec, timeLate time.Duration, out io.Writer) error {
-	return util.Grade(g.db, []string{"go", "test", "-cover", "-json"}, spec, g.readGoResults, out)
+	return util.Grade(g.db, []string{"go", "test", "-cover", "-json"}, spec, timeLate, g.readGoResults, out)
 }
 
 func (g GoGrader) readGoResults(testOutput string, timeLate time.Duration) (float64, float64, float64, time.Duration, error) {

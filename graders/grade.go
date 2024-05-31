@@ -7,10 +7,11 @@ import (
 	"cso/codecowboy/graders/net"
 	"cso/codecowboy/store"
 	"io"
+	"time"
 )
 
 type Grader interface {
-	Grade(spec classroom.AssignmentSpec, out io.Writer) error
+	Grade(spec classroom.AssignmentSpec, timeLate time.Duration, out io.Writer) error
 }
 
 func GetGrader(language string, db *store.DB) Grader {

@@ -20,7 +20,7 @@ func NewNetGrader(db *store.DB) NetGrader {
 }
 
 func (n NetGrader) Grade(spec classroom.AssignmentSpec, timeLate time.Duration, out io.Writer) error {
-	return util.Grade(n.db, []string{"dotnet", "test", "--logger", "trx;logfilename=../../results.trx"}, spec, func(stdOut string) (float64, float64, float64, time.Duration, error) {
+	return util.Grade(n.db, []string{"dotnet", "test", "--logger", "trx;logfilename=../../results.trx"}, spec, timeLate, func(stdOut string, duration time.Duration) (float64, float64, float64, time.Duration, error) {
 		wd, _ := os.Getwd()
 		reportPath := path.Join(wd, "results.trx")
 		return readNetTestResults(reportPath, timeLate)

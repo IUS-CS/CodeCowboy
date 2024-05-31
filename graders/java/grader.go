@@ -18,11 +18,11 @@ type JavaGrader struct {
 }
 
 func (j JavaGrader) Grade(spec classroom.AssignmentSpec, timeLate time.Duration, out io.Writer) error {
-	return util.Grade(j.db, []string{"./gradlew", "test"}, spec, func(stdOut string) (float64, float64, float64, error) {
+	return util.Grade(j.db, []string{"./gradlew", "test"}, spec, timeLate, func(string, time.Duration) (float64, float64, float64, time.Duration, error) {
 		wd, _ := os.Getwd()
 		reportPath := path.Join(wd, "build", "test-results", "test")
 		log.Debug("reading test output", "reportPath", reportPath)
-		return readJavaTestResults(reportPath)
+		return readJavaTestResults(reportPath, timeLate)
 	}, out)
 }
 
@@ -57,11 +57,11 @@ type javaTestsuite struct {
 	SystemErr string `xml:"system-err"`
 }
 
-func readJavaTestResults(reportPath string) (float64, float64, float64, error) {
+func readJavaTestResults(reportPath string, timeLate time.Duration) (float64, float64, float64, time.Duration, error) {
 	tests, failures := 0.0, 0.0
 	files, err := os.ReadDir(reportPath)
 	if err != nil {
-		return 0, 0, 0, err
+		return 0, 0, 0, timeLate, err
 	}
 	for _, f := range files {
 		if !strings.HasSuffix(f.Name(), "xml") {
@@ -69,16 +69,16 @@ func readJavaTestResults(reportPath string) (float64, float64, float64, error) {
 		}
 		contents, err := os.ReadFile(path.Join(reportPath, f.Name()))
 		if err != nil {
-			return 0, 0, 0, err
+			return 0, 0, 0, timeLate, err
 		}
 		suite := javaTestsuite{}
 		err = xml.Unmarshal(contents, &suite)
 		if err != nil {
-			return 0, 0, 0, err
+			return 0, 0, 0, timeLate, err
 		}
 		tests += float64(suite.Tests)
 		failures += float64(suite.Failures)
 		log.Debug("found test file", "tests", tests, "failures", failures)
 	}
-	return tests - failures, failures, 0.0, nil
+	return tests - failures, failures, 0.0, timeLate, nil
 }

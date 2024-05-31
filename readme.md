@@ -132,6 +132,12 @@ requires: MkClassroom
 ./mkclassroom -canvaspath=example/CowboyTest_canvas.csv -ghpath=example/classroom_roster.csv -assignments=example/cowboytest_assign.json -course=cowboytest
 ```
 
+### Build
+
+Builds all objects.
+
+requires: MkClassroom, Web
+
 ## Is it good?
 
 I think it's sufficient.
