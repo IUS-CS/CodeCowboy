@@ -17,8 +17,8 @@ type JavaGrader struct {
 	db *store.DB
 }
 
-func (j JavaGrader) Grade(spec classroom.AssignmentSpec, timeLate time.Duration, out io.Writer) error {
-	return util.Grade(j.db, []string{"./gradlew", "test"}, spec, timeLate, func(string, time.Duration) (float64, float64, float64, time.Duration, error) {
+func (j JavaGrader) Grade(spec classroom.AssignmentSpec, dueDate time.Time, out io.Writer) error {
+	return util.Grade(j.db, []string{"./gradlew", "test"}, spec, dueDate, func(string, timeLate time.Duration) (float64, float64, float64, time.Duration, error) {
 		wd, _ := os.Getwd()
 		reportPath := path.Join(wd, "build", "test-results", "test")
 		log.Debug("reading test output", "reportPath", reportPath)

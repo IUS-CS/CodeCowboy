@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"io"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -128,10 +129,13 @@ func (w *Web) handleRunAssignment(wr http.ResponseWriter, r *http.Request) {
 					w.runLog[course+assignment] = map[string]string{}
 				}
 				w.runLog[course+assignment][id] = STATUS_RUNNING
-				out, timeLate, err := a.CloneAndRun(dueDate, func(path string) (string, error) {
-					a.Path = path
-					return run(w.db, a, timeLate)
-				})
+
+				wd, _ := os.Getwd()
+				tmpDir, _, err := a.Clone()
+				defer a.Cleanup(wd, tmpDir)
+
+				out, err := run(w.db, a, dueDate)
+
 				if err != nil {
 					w.runLog[course+assignment][id] = err.Error()
 				} else {
@@ -185,7 +189,7 @@ func (w *Web) handleDownloadResult(wr http.ResponseWriter, r *http.Request) {
 	wr.Write([]byte(w.runLog[course+assignment][id]))
 }
 
-func run(db *store.DB, a classroom.AssignmentSpec, timeLate time.Duration) (string, error) {
+func run(db *store.DB, a classroom.AssignmentSpec, dueDate time.Time) (string, error) {
 
 	var grader Grader
 
@@ -202,10 +206,10 @@ func run(db *store.DB, a classroom.AssignmentSpec, timeLate time.Duration) (stri
 	}
 
 	out := bytes.NewBuffer([]byte{})
-	err := grader.Grade(a, timeLate, out)
+	err := grader.Grade(a, dueDate, out)
 	return out.String(), err
 }
 
 type Grader interface {
-	Grade(spec classroom.AssignmentSpec, timeLate time.Duration, out io.Writer) error
+	Grade(spec classroom.AssignmentSpec, timeLate time.Time, out io.Writer) error
 }

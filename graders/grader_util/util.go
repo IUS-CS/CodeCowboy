@@ -29,9 +29,9 @@ func CopyExtras(from string, to string) error {
 	return nil
 }
 
-type TestResult func(stdOut string, timeLate time.Duration) (float64, float64, float64, time.Duration, error)
+type TestResult func(stdOut string, dueDate time.Time) (float64, float64, float64, time.Duration, error)
 
-func Grade(db *store.DB, command []string, spec classroom.AssignmentSpec, timeLate time.Duration, testResult TestResult, out io.Writer) error {
+func Grade(db *store.DB, command []string, spec classroom.AssignmentSpec, dueDate time.Time, testResult TestResult, out io.Writer) error {
 	studentList, err := classroom.New(db, spec.Course)
 	if err != nil {
 		return err
@@ -78,7 +78,7 @@ func Grade(db *store.DB, command []string, spec classroom.AssignmentSpec, timeLa
 			log.Error("error executing", "stdout", stdOut.String(), "stderr", stdErr.String())
 		}
 
-		passes, fails, cover, timeLate, err := testResult(stdOut.String(), timeLate)
+		passes, fails, cover, timeLate, err := testResult(stdOut.String(), dueDate)
 		if err != nil {
 			return err
 		}

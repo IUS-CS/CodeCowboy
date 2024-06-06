@@ -20,16 +20,17 @@ func NewGoGrader(db *store.DB) GoGrader {
 	return GoGrader{db}
 }
 
-func (g GoGrader) Grade(spec classroom.AssignmentSpec, timeLate time.Duration, out io.Writer) error {
-	return util.Grade(g.db, []string{"go", "test", "-cover", "-json"}, spec, timeLate, g.readGoResults, out)
+func (g GoGrader) Grade(spec classroom.AssignmentSpec, dueDate time.Time, out io.Writer) error {
+	return util.Grade(g.db, []string{"go", "test", "-cover", "-json"}, spec, dueDate, g.readGoResults, out)
 }
 
-func (g GoGrader) readGoResults(testOutput string, timeLate time.Duration) (float64, float64, float64, time.Duration, error) {
+func (g GoGrader) readGoResults(testOutput string, dueDate time.Time) (float64, float64, float64, time.Duration, error) {
 	outputs := g.fromJSONLines(testOutput)
 	passes, _ := g.getKind(outputs, KindPASS)
 	fails, _ := g.getKind(outputs, KindFAIL)
 	cover := g.getCoverage(outputs)
-	return passes, fails, cover, timeLate, nil
+	// todo need to calculate late time here?
+	return passes, fails, cover, time.Duration(0), nil
 }
 
 type goTestOutput struct {

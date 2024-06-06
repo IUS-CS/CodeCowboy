@@ -141,11 +141,11 @@ func (a AssignmentSpec) checkSubmissionDate(path string, dueDate time.Time) (tim
 	return commitTime.Sub(dueDate), nil
 }
 
-func errReturn(err error) (string, time.Duration, error) {
-	return "", time.Duration(0), err
+func errReturn(err error) (string, string, error) {
+	return "", "", err
 }
 
-func (a AssignmentSpec) CloneAndRun(dueDate time.Time, runner func(string) (string, error)) (string, time.Duration, error) {
+func (a AssignmentSpec) Clone() (string, string, error) {
 	if err := a.Validate(); err != nil {
 		return errReturn(err)
 	}
@@ -153,25 +153,16 @@ func (a AssignmentSpec) CloneAndRun(dueDate time.Time, runner func(string) (stri
 	if err != nil {
 		return errReturn(err)
 	}
-	defer os.RemoveAll(tmpPath)
-	wd, err := os.Getwd()
-	if err != nil {
-		return errReturn(err)
-	}
-	defer os.Chdir(wd)
 	err = os.Chdir(tmpPath)
 	if err != nil {
 		return errReturn(err)
 	}
-	delta, err := a.checkSubmissionDate(".", dueDate)
-	if err != nil {
-		return errReturn(err)
-	}
+
 	log.Debugf("Created tmp dir: %s", tmpPath)
 	fmtCmd := fmt.Sprintf(cloner, tmpPath, stripDanger(a.Course), stripDanger(a.Name))
 	log.Debugf("Running command: %s", fmtCmd)
 	cmd := exec.Command("/bin/sh", "-c", fmtCmd)
-	if err = cmd.Run(); err != nil {
+	if err := cmd.Run(); err != nil {
 		return errReturn(err)
 	}
 	fmtCmd = fmt.Sprintf(assignmentName, stripDanger(a.Course), stripDanger(a.Name))
@@ -179,7 +170,7 @@ func (a AssignmentSpec) CloneAndRun(dueDate time.Time, runner func(string) (stri
 	log.Debugf("Running command: %s", cmd.String())
 	stdOut := strings.Builder{}
 	cmd.Stdout = &stdOut
-	if err = cmd.Run(); err != nil {
+	if err := cmd.Run(); err != nil {
 		return errReturn(err)
 	}
 	log.Debugf("result: %s", stdOut.String())
@@ -198,9 +189,10 @@ func (a AssignmentSpec) CloneAndRun(dueDate time.Time, runner func(string) (stri
 	if assnPath == "" {
 		return errReturn(fmt.Errorf("assignment path not found: %s/%s-submissions", tmpPath, ghAssignmentName))
 	}
-	output, err := runner(assnPath)
-	if err != nil {
-		return errReturn(err)
-	}
-	return output, delta, nil
+	return tmpPath, assnPath, nil
+}
+
+func (a AssignmentSpec) Cleanup(wd, tmpPath string) error {
+	defer os.Chdir(wd)
+	return os.RemoveAll(tmpPath)
 }
