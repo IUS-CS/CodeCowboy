@@ -3,8 +3,8 @@ package util
 import (
 	"cso/codecowboy/canvasfmt"
 	"cso/codecowboy/classroom"
+	"cso/codecowboy/graders/types"
 	"cso/codecowboy/store"
-	"fmt"
 	"github.com/charmbracelet/log"
 	cp "github.com/otiai10/copy"
 	"io"
@@ -29,9 +29,9 @@ func CopyExtras(from string, to string) error {
 	return nil
 }
 
-type TestResult func(stdOut string, dueDate time.Time) (float64, float64, float64, time.Duration, error)
+type TestResultFunc func(stdOut string, dueDate time.Duration) (types.GraderReturn, error)
 
-func Grade(db *store.DB, command []string, spec classroom.AssignmentSpec, dueDate time.Time, testResult TestResult, out io.Writer) error {
+func Grade(db *store.DB, command []string, spec classroom.AssignmentSpec, dueDate time.Time, testResult func(stdOut string, timeLate time.Duration) (types.GraderReturn, error), out io.Writer) error {
 	studentList, err := classroom.New(db, spec.Course)
 	if err != nil {
 		return err
@@ -78,22 +78,26 @@ func Grade(db *store.DB, command []string, spec classroom.AssignmentSpec, dueDat
 			log.Error("error executing", "stdout", stdOut.String(), "stderr", stdErr.String())
 		}
 
-		passes, fails, cover, timeLate, err := testResult(stdOut.String(), dueDate)
+		timeLate, err := spec.CheckSubmissionDate(getwd, dueDate)
 		if err != nil {
 			return err
 		}
 
-		score, err := spec.Score(passes, fails, cover, timeLate)
+		result, err := testResult(stdOut.String(), timeLate)
 		if err != nil {
 			return err
 		}
 
-		gradeStr := fmt.Sprintf("%2.1f%%", score)
+		score, err := spec.Score(result)
+		if err != nil {
+			return err
+		}
+
 		who := canvasfmt.SISNameFromDirName(studentList.Students, d.Name())
 
 		grades[who] = score
 
-		log.Info("Finished grading", "user", who, "passes", passes, "fails", fails, "cover", cover, "grade", gradeStr)
+		log.Info("Finished grading", "user", who, "result", result)
 
 		err = os.Chdir(getwd)
 		if err != nil {

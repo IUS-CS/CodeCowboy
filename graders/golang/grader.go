@@ -3,6 +3,7 @@ package golang
 import (
 	"cso/codecowboy/classroom"
 	util "cso/codecowboy/graders/grader_util"
+	"cso/codecowboy/graders/types"
 	"cso/codecowboy/store"
 	"encoding/json"
 	"github.com/charmbracelet/log"
@@ -24,13 +25,15 @@ func (g GoGrader) Grade(spec classroom.AssignmentSpec, dueDate time.Time, out io
 	return util.Grade(g.db, []string{"go", "test", "-cover", "-json"}, spec, dueDate, g.readGoResults, out)
 }
 
-func (g GoGrader) readGoResults(testOutput string, dueDate time.Time) (float64, float64, float64, time.Duration, error) {
+func (g GoGrader) readGoResults(testOutput string, timeLate time.Duration) (types.GraderReturn, error) {
 	outputs := g.fromJSONLines(testOutput)
 	passes, _ := g.getKind(outputs, KindPASS)
 	fails, _ := g.getKind(outputs, KindFAIL)
 	cover := g.getCoverage(outputs)
 	// todo need to calculate late time here?
-	return passes, fails, cover, time.Duration(0), nil
+	return types.GraderReturn{
+		passes, fails, cover, timeLate,
+	}, nil
 }
 
 type goTestOutput struct {

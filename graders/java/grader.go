@@ -3,6 +3,7 @@ package java
 import (
 	"cso/codecowboy/classroom"
 	util "cso/codecowboy/graders/grader_util"
+	"cso/codecowboy/graders/types"
 	"cso/codecowboy/store"
 	"encoding/xml"
 	"github.com/charmbracelet/log"
@@ -18,7 +19,7 @@ type JavaGrader struct {
 }
 
 func (j JavaGrader) Grade(spec classroom.AssignmentSpec, dueDate time.Time, out io.Writer) error {
-	return util.Grade(j.db, []string{"./gradlew", "test"}, spec, dueDate, func(string, timeLate time.Duration) (float64, float64, float64, time.Duration, error) {
+	return util.Grade(j.db, []string{"./gradlew", "test"}, spec, dueDate, func(stdOut string, timeLate time.Duration) (types.GraderReturn, error) {
 		wd, _ := os.Getwd()
 		reportPath := path.Join(wd, "build", "test-results", "test")
 		log.Debug("reading test output", "reportPath", reportPath)
@@ -57,11 +58,11 @@ type javaTestsuite struct {
 	SystemErr string `xml:"system-err"`
 }
 
-func readJavaTestResults(reportPath string, timeLate time.Duration) (float64, float64, float64, time.Duration, error) {
+func readJavaTestResults(reportPath string, timeLate time.Duration) (types.GraderReturn, error) {
 	tests, failures := 0.0, 0.0
 	files, err := os.ReadDir(reportPath)
 	if err != nil {
-		return 0, 0, 0, timeLate, err
+		return types.GraderReturn{}, err
 	}
 	for _, f := range files {
 		if !strings.HasSuffix(f.Name(), "xml") {
@@ -69,16 +70,21 @@ func readJavaTestResults(reportPath string, timeLate time.Duration) (float64, fl
 		}
 		contents, err := os.ReadFile(path.Join(reportPath, f.Name()))
 		if err != nil {
-			return 0, 0, 0, timeLate, err
+			return types.GraderReturn{}, err
 		}
 		suite := javaTestsuite{}
 		err = xml.Unmarshal(contents, &suite)
 		if err != nil {
-			return 0, 0, 0, timeLate, err
+			return types.GraderReturn{}, err
 		}
 		tests += float64(suite.Tests)
 		failures += float64(suite.Failures)
 		log.Debug("found test file", "tests", tests, "failures", failures)
 	}
-	return tests - failures, failures, 0.0, timeLate, nil
+	return types.GraderReturn{
+		Passed:   tests - failures,
+		Failed:   failures,
+		Coverage: 0,
+		TimeLate: timeLate,
+	}, nil
 }

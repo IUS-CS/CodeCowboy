@@ -2,6 +2,7 @@ package classroom
 
 import (
 	"bytes"
+	"cso/codecowboy/graders/types"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -57,12 +58,12 @@ func ParseAssignments(r io.Reader, courseName string) (Assignments, error) {
 	return assignments, nil
 }
 
-func (a AssignmentSpec) Score(passed, failed, cover float64, timeLate time.Duration) (float64, error) {
+func (a AssignmentSpec) Score(testResult types.GraderReturn) (float64, error) {
 	env := map[string]any{
-		"passed": passed,
-		"failed": failed,
-		"cover":  cover,
-		"late":   timeLate,
+		"passed": testResult.Passed,
+		"failed": testResult.Failed,
+		"cover":  testResult.Coverage,
+		"late":   testResult.TimeLate,
 	}
 	if a.Expr == "" {
 		a.Expr = DEFAULT_EXPR
@@ -111,7 +112,7 @@ func stripDanger(input string) string {
 
 var emptyTime = time.Duration(0)
 
-func (a AssignmentSpec) checkSubmissionDate(path string, dueDate time.Time) (time.Duration, error) {
+func (a AssignmentSpec) CheckSubmissionDate(path string, dueDate time.Time) (time.Duration, error) {
 	wd, err := os.Getwd()
 	if err != nil {
 		return emptyTime, err

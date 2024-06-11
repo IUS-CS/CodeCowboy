@@ -3,6 +3,7 @@ package net
 import (
 	"cso/codecowboy/classroom"
 	util "cso/codecowboy/graders/grader_util"
+	"cso/codecowboy/graders/types"
 	"cso/codecowboy/store"
 	"encoding/xml"
 	"io"
@@ -20,26 +21,32 @@ func NewNetGrader(db *store.DB) NetGrader {
 }
 
 func (n NetGrader) Grade(spec classroom.AssignmentSpec, dueDate time.Time, out io.Writer) error {
-	return util.Grade(n.db, []string{"dotnet", "test", "--logger", "trx;logfilename=../../results.trx"}, spec, dueDate, func(stdOut string, timeLate time.Duration) (float64, float64, float64, time.Duration, error) {
-		wd, _ := os.Getwd()
-		reportPath := path.Join(wd, "results.trx")
-		return readNetTestResults(reportPath, timeLate)
-	}, out)
+	return util.Grade(n.db, []string{"dotnet", "test", "--logger", "trx;logfilename=../../results.trx"}, spec, dueDate,
+		func(stdOut string, timeLate time.Duration) (types.GraderReturn, error) {
+			wd, _ := os.Getwd()
+			reportPath := path.Join(wd, "results.trx")
+			return readNetTestResults(reportPath, timeLate)
+		}, out)
 }
 
-func readNetTestResults(reportPath string, timeLate time.Duration) (float64, float64, float64, time.Duration, error) {
+func readNetTestResults(reportPath string, timeLate time.Duration) (types.GraderReturn, error) {
 	contents, err := os.ReadFile(reportPath)
 	if err != nil {
-		return 0, 0, 0, time.Duration(0), err
+		return types.GraderReturn{}, err
 	}
 	suite := netTestRun{}
 	err = xml.Unmarshal(contents, &suite)
 	if err != nil {
-		return 0, 0, 0, time.Duration(0), err
+		return types.GraderReturn{}, err
 	}
 
 	counters := suite.ResultSummary.Counters
-	return float64(counters.Passed), float64(counters.Failed), 0.0, timeLate, nil
+	return types.GraderReturn{
+		Passed:   float64(counters.Passed),
+		Failed:   float64(counters.Failed),
+		Coverage: 0,
+		TimeLate: timeLate,
+	}, nil
 }
 
 type netTestRun struct {
