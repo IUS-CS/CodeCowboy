@@ -3,7 +3,6 @@ package store
 import (
 	"encoding/json"
 	"fmt"
-
 	bolt "go.etcd.io/bbolt"
 )
 
@@ -63,8 +62,11 @@ func (db *DB) Get(key string) ([]byte, error) {
 	}
 	defer kv.Close()
 	out := []byte{}
-	err = kv.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket(db.bucket)
+	err = kv.Update(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists(db.bucket)
+		if err != nil {
+			return err
+		}
 		out = b.Get([]byte(key))
 		return nil
 	})
