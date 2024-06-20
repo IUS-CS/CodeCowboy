@@ -8,6 +8,7 @@ import (
 	"cso/codecowboy/graders/net"
 	"cso/codecowboy/store"
 	"fmt"
+	"github.com/charmbracelet/log"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"io"
@@ -36,11 +37,17 @@ func (w *Web) setupAssignmentHandlers() chi.Router {
 func (w *Web) handleAssignmentDetails(wr http.ResponseWriter, r *http.Request) {
 	courseName := chi.URLParam(r, "course")
 	assignmentName := chi.URLParam(r, "assignment")
+	if courseName == "" || assignmentName == "" {
+		w.renderErr(r.Context(), wr, fmt.Errorf("handleAssignmentDetails missing information, course: %s, assignment: %s", courseName, assignmentName))
+		return
+	}
 	course, err := classroom.New(w.db, courseName)
 	if err != nil {
 		w.renderErr(r.Context(), wr, err)
+		return
 	}
 	for _, a := range course.Assignments {
+		log.Debugf("handleAssignmentDetails checking %s against %s", a.Name, assignmentName)
 		if a.Name == assignmentName {
 			if a.Expr == "" {
 				a.Expr = classroom.DEFAULT_EXPR
@@ -49,7 +56,8 @@ func (w *Web) handleAssignmentDetails(wr http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	w.renderErr(r.Context(), wr, fmt.Errorf("could not find assignment"))
+	log.Debugf("handleAssignmentDetails checking %s against %s, course: %+v", assignmentName, courseName, course)
+	w.renderErr(r.Context(), wr, fmt.Errorf("handleAssignmentDetails could not find assignment %s for %s", assignmentName, courseName))
 }
 
 func (w *Web) handleRmAssignment(wr http.ResponseWriter, r *http.Request) {
@@ -131,8 +139,10 @@ func (w *Web) handleRunAssignment(wr http.ResponseWriter, r *http.Request) {
 				w.runLog[course+assignment][id] = STATUS_RUNNING
 
 				wd, _ := os.Getwd()
-				tmpDir, _, err := a.Clone()
+				tmpDir, assnPath, err := a.Clone()
 				defer a.Cleanup(wd, tmpDir)
+
+				a.Path = assnPath
 
 				out, err := run(w.db, a, dueDate)
 
@@ -145,8 +155,9 @@ func (w *Web) handleRunAssignment(wr http.ResponseWriter, r *http.Request) {
 			wr.Header().Set("HX-Location", "/courses/"+cls.Name+"/assignments/"+assignment)
 			return
 		}
+		return
 	}
-	w.renderErr(r.Context(), wr, fmt.Errorf("could not find assignment"))
+	w.renderErr(r.Context(), wr, fmt.Errorf("handleRunAssignment could not find assignment"))
 }
 
 func (w *Web) handleExecutionList(wr http.ResponseWriter, r *http.Request) {

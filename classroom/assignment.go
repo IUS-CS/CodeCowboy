@@ -182,9 +182,10 @@ func (a AssignmentSpec) Clone() (string, string, error) {
 	}
 	var assnPath string
 	for _, d := range dir {
-		log.Debugf("Inspecting %s similar to %s", d.Name(), ghAssignmentName)
 		if strings.HasPrefix(d.Name(), ghAssignmentName) && strings.HasSuffix(d.Name(), "-submissions") {
+			log.Debugf("Inspecting %s similar to %s", d.Name(), ghAssignmentName)
 			assnPath = filepath.Join(tmpPath, d.Name())
+			break
 		}
 	}
 	if assnPath == "" {

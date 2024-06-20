@@ -78,10 +78,12 @@ func Grade(db *store.DB, command []string, spec classroom.AssignmentSpec, dueDat
 			log.Error("error executing", "stdout", stdOut.String(), "stderr", stdErr.String())
 		}
 
-		timeLate, err := spec.CheckSubmissionDate(getwd, dueDate)
-		if err != nil {
-			return err
-		}
+		//timeLate, err := spec.CheckSubmissionDate(getwd, dueDate)
+		//if err != nil {
+		//	return err
+		//}
+
+		timeLate := time.Duration(0)
 
 		result, err := testResult(stdOut.String(), timeLate)
 		if err != nil {
