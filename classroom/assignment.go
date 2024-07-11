@@ -18,7 +18,7 @@ import (
 	"github.com/expr-lang/expr"
 )
 
-const DEFAULT_EXPR = `passed / (passed+failed)`
+const DEFAULT_EXPR = `passed / (passed+failed) * (late == 0 ? 1 : 0)`
 
 var Languages = []string{"go", "java", "net"}
 
@@ -63,7 +63,7 @@ func (a AssignmentSpec) Score(testResult types.GraderReturn) (float64, error) {
 		"passed": testResult.Passed,
 		"failed": testResult.Failed,
 		"cover":  testResult.Coverage,
-		"late":   testResult.TimeLate,
+		"late":   int(testResult.TimeLate),
 	}
 	if a.Expr == "" {
 		a.Expr = DEFAULT_EXPR
@@ -76,6 +76,7 @@ func (a AssignmentSpec) Score(testResult types.GraderReturn) (float64, error) {
 	if err != nil {
 		return 0.0, err
 	}
+	log.Debug("score finished", "env", env, "result", result)
 	return result.(float64), nil
 }
 

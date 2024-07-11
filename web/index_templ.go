@@ -77,7 +77,7 @@ func (w *Web) Header(title string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css\"><style>\n        .navTitle {\n            text-style: none;\n            color: var(--pico-h1-color);\n        }\n        input:invalid {\n            border: 2px dashed red;\n        }\n        button {\n            padding: 5px;\n        }\n        </style></head>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<link rel=\"stylesheet\" href=\"/static/pico/css/pico.min.css\"><style>\n        .navTitle {\n            text-style: none;\n            color: var(--pico-h1-color);\n        }\n        input:invalid {\n            border: 2px dashed red;\n        }\n        button {\n            padding: 5px;\n        }\n        </style></head>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
