@@ -1,7 +1,17 @@
 [
 	{
-	  "Name": "Assignment1",
+		"Name": "Assignment1",
+		"Course": "cowboytest",
+		"Type": "go"
+	},
+	{
+		"Name": "Assignment2",
+		"Course": "cowboytest",
+		"Type": "java"
+	},
+	{
+	  "Name": "Assignment3",
 	  "Course": "cowboytest",
-	  "Type": "go"
+	  "Type": "net"
 	}
 ]

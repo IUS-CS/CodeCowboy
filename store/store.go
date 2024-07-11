@@ -65,7 +65,7 @@ func (db *DB) Get(key string) ([]byte, error) {
 	out := []byte{}
 	err := db.DB.Get(&out, `select val from kv where key=?`, key)
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil, ErrKeyNotFound{key: key}
+		return out, ErrKeyNotFound{key: key}
 	}
 	return out, err
 }
@@ -82,7 +82,7 @@ func (db *DB) Keys() ([][]byte, error) {
 }
 
 func (db *DB) Unmarshal(key string, dest any) error {
-	log.Debugf("unmarshaling %s from %v", key)
+	log.Debugf("unmarshaling %s", key)
 	value, err := db.Get(key)
 	if errors.As(err, &ErrKeyNotFound{}) {
 		return nil
