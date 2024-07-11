@@ -2,6 +2,7 @@ package store
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
@@ -66,5 +67,64 @@ func TestUnmarshal(t *testing.T) {
 	err = db.Unmarshal("test", &actual)
 	assert.Nil(t, err)
 	assert.Equal(t, expected, actual)
+	teardown(t)
+}
+
+func TestKeys(t *testing.T) {
+	db := setup(t)
+	keys := []string{"test1", "test2", "test3"}
+	expected := [][]byte{}
+	for _, key := range keys {
+		expected = append(expected, []byte(key))
+		err := db.Set(key, "test")
+		assert.Nil(t, err)
+	}
+
+	actual, err := db.Keys()
+	assert.Nil(t, err)
+	assert.Equal(t, expected, actual)
+
+	teardown(t)
+}
+
+func TestImport(t *testing.T) {
+	db := setup(t)
+
+	items := []kv{}
+	for i := range 10 {
+		items = append(items, kv{fmt.Sprint(i), fmt.Sprint(i)})
+	}
+
+	itemsJson, err := json.Marshal(items)
+	assert.Nil(t, err)
+
+	err = db.Import(itemsJson)
+	assert.Nil(t, err)
+
+	keys, err := db.Keys()
+	assert.Nil(t, err)
+	for i := range keys {
+		assert.Equal(t, items[i].Key, string(keys[i]))
+	}
+
+	teardown(t)
+}
+
+func TestExport(t *testing.T) {
+	db := setup(t)
+
+	items := []kv{}
+	for i := range 1 {
+		items = append(items, kv{fmt.Sprint(i), fmt.Sprint(i)})
+		err := db.Set(fmt.Sprint(i), fmt.Sprint(i))
+		assert.Nil(t, err)
+	}
+
+	expected := `[{"Key":"0","Val":"\"0\""}]`
+
+	actual, err := db.Export()
+	assert.Nil(t, err)
+	assert.Equal(t, expected, string(actual))
+
 	teardown(t)
 }

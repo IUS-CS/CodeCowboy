@@ -16,6 +16,11 @@ type ErrKeyNotFound struct {
 	err error
 }
 
+type kv struct {
+	Key string
+	Val string
+}
+
 func (e ErrKeyNotFound) Error() string {
 	return fmt.Sprintf("key %s not found, %v", e.key, e.err)
 }
@@ -95,10 +100,7 @@ func (db *DB) Unmarshal(key string, dest any) error {
 }
 
 func (db *DB) Export() ([]byte, error) {
-	data := []struct {
-		Key string
-		Val string
-	}{}
+	data := []kv{}
 	err := db.Select(&data, `select key, val from kv`)
 
 	out, err := json.Marshal(data)
@@ -106,10 +108,7 @@ func (db *DB) Export() ([]byte, error) {
 }
 
 func (db *DB) Import(data []byte) error {
-	input := []struct {
-		Key string
-		Val string
-	}{}
+	input := []kv{}
 	if err := json.Unmarshal(data, &input); err != nil {
 		return err
 	}
