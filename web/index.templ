@@ -11,8 +11,7 @@ templ (w *Web) Header(title string) {
         }
         <link
           rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
-        />
+          href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
         <style>
         .navTitle {
             text-style: none;
@@ -30,7 +29,7 @@ templ (w *Web) Header(title string) {
 
 templ (w *Web) Footer() {
     <footer></footer>
-    <script src="//unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+    <script src="/static/htmx.min.js"></script>
 }
 
 templ (w *Web) Index(title string, contents templ.Component) {

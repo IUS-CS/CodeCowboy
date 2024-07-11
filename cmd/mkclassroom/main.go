@@ -36,7 +36,7 @@ func main() {
 
 	cls, err := classroom.New(db, *course)
 	if err != nil {
-		log.Fatal("classroom.New", err)
+		log.Fatalf("classroom.New %e", err)
 	}
 	roster := cls.Students
 

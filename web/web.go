@@ -3,7 +3,11 @@ package web
 import (
 	"context"
 	"github.com/charmbracelet/log"
+	"github.com/go-chi/chi/v5/middleware"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"cso/codecowboy/store"
 
@@ -40,6 +44,9 @@ func (w *Web) Navs() []NavItem {
 
 func (w *Web) ListenAndServe() error {
 	router := chi.NewRouter()
+
+	router.Use(middleware.DefaultLogger)
+
 	router.Get("/", func(wr http.ResponseWriter, r *http.Request) {
 		http.Redirect(wr, r, "/courses", http.StatusFound)
 	})
@@ -48,7 +55,30 @@ func (w *Web) ListenAndServe() error {
 	router.Mount("/courses", w.setupCourseHandlers())
 	router.Mount("/db", w.setupDBUtilHandlers())
 
+	workDir, _ := os.Getwd()
+	filesDir := http.Dir(filepath.Join(workDir, "static"))
+	fileServer(router, "/static", filesDir)
+
 	return http.ListenAndServe(w.listenAddr, router)
+}
+
+func fileServer(r chi.Router, path string, root http.FileSystem) {
+	if strings.ContainsAny(path, "{}*") {
+		panic("FileServer does not permit any URL parameters.")
+	}
+
+	if path != "/" && path[len(path)-1] != '/' {
+		r.Get(path, http.RedirectHandler(path+"/", 301).ServeHTTP)
+		path += "/"
+	}
+	path += "*"
+
+	r.Get(path, func(w http.ResponseWriter, r *http.Request) {
+		rctx := chi.RouteContext(r.Context())
+		pathPrefix := strings.TrimSuffix(rctx.RoutePattern(), "/*")
+		fs := http.StripPrefix(pathPrefix, http.FileServer(root))
+		fs.ServeHTTP(w, r)
+	})
 }
 
 func (w *Web) renderErr(ctx context.Context, wr http.ResponseWriter, err error) {
