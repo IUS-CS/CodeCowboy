@@ -196,6 +196,11 @@ func (a AssignmentSpec) Clone() (string, string, error) {
 }
 
 func (a AssignmentSpec) Cleanup(wd, tmpPath string) error {
-	defer os.Chdir(wd)
+	chBack := func() {
+		if err := os.Chdir(wd); err != nil {
+			panic(err)
+		}
+	}
+	defer chBack()
 	return os.RemoveAll(tmpPath)
 }

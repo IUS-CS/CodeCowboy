@@ -179,3 +179,8 @@ Temporary Items
 .idea
 grade
 mkclassroom
+
+CowboyTest/
+codecowboy.db
+modd.conf
+server
