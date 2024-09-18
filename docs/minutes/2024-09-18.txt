@@ -1,0 +1,17 @@
+2024-09-18 Minutes:
+
+We setup the GitHub repo and added team as collaborators. Then, we tested to make sure we could all access and write to the repository.
+
+We then divvied up the work for the first report:
+- Dale: Parts 1-2
+- Garrison: Parts 3-4
+- Andrew: Parts 5-7
+
+Created some rulesets for the repository.
+- Main repository requires a pull request to merge.
+- pre-wip branch is read-only, and is to be used for reference.
+
+We also analyzed the requirements for the project in more detail:
+- Went over the project structure
+- Discussed the Go programming language
+- Reviewed what the first steps are for the project

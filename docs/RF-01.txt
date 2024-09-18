@@ -1,0 +1,19 @@
+5. Market Research
+
+First, the biggest driver for the market need for an autograder is from the IUS Computer Science department. In particular, Professor Chris Sexton has a need for a program that will run students' code against predefined tests for each assignment, and produces a set of Canvas grades to be directly imported into a course. Novak and Kermek in Education Sciences (https://www.mdpi.com/2227-7102/14/1/54) highlight the need for an improved grading system for programming assignments. They state that it can take up to an hour per student to grade a complex programming assignment.
+
+Our potential customer base for this project is for any professor or teacher who teaches a programming course with unit tests, and requires to run students' code against their own tests automatically, providing a graded output.
+
+Our product will be a simple but powerful tool that can be run locally and locally configured to automatically generate grade outputs for Canvas, providing a deep integration with existing services that instructors use, providing a benefit to other autograding solutions like codePost and GitHub's auto grader.
+
+6. Alternative Solution
+
+Apart from the other market solutions, there are a couple alternative directions that this project could've headed. One alternative for this project is to integrate with an existing service like AWS for hosting and code-running. This solution was tried in previous iterations of the project, but this adds an extra overhead in cost and code maintenance, which are both things that cannot be afforded. This project is meant to be a simple solution to autograding, with very low maintenance for the next code owner (Professor Sexton).
+
+Another possible direction that our project could have gone is recreating the autograder project as a standalone desktop application with its own GUI. The current solution allows the project to be run locally on the command line, or to host the autograder on a website. First, we want to ensure we can add as much functionality to this project as possible, which is only possible if we reuse the code already provided to us, and continue the project in its current direction. The project is also meant to be simple to use, which both a CLI tool and a website allows. The grading workflow when using the CLI can always remain the same, and a user doesn't have to download the program and learn a new GUI if they don't want to. However, we can also allow users to simply navigate to the webpage and use a GUI if they need to.
+
+7. Project Risks
+
+The biggest risk in this project is the potential for the project to be taken in a direction that is not useful for the customer. As students, we are given free reign over the project and can, for the most part, take the project in any direction that we wish. However, this might become a problem if we were to start adding complex functionality that is unrequired. To mitigate this, we plan to meet with our "product owner" (sponsor), Professor Sexton, to ensure that we are taking the project in a direction that he finds useful.
+
+Another potential risk is that the project is developed in a way that is not minimally maintainable. If we start to take the project in a direction that requires constant maintenance, as the previous AWS solution does, then the project will likely be completely abandoned and not at all useful after we have finished our part with it. To mitigate this, we will strongly consider the simplicity and maintainability of the code that we are writing, to ensure that the next owner (likely Professor Sexton) can make any updates that need to be made without constant maintenance from an entire software team. The meetings with Professor Sexton will also help in mitigating this maintainability issue.
