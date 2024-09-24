@@ -1,8 +1,8 @@
+1. Product
+CodeCowboy is intended to be a small-scale program which can be run locally and used by teachers at IUS. It is meant to not rely on any external sources such as AWS as well. The main functionality of the program is to run test cases on student-submitted code using GitHub Classroom. It is designed to best suite the needs of the computer science department at IUS. It is also meant to be easy to implement and maintain.
 
-
-
-
-
+2. Technical Feasibility
+The expectations placed on the CodeCowboys are reasonable and feasible. The skill level of our team will be adequate for us to be able to get the project into a working, deployable state. CodeCowboy is currently completely written in GO and heavily utilizes the GitHub API. It will be designed to run primarily on mac devices, but will likely support other environments as well. 
 
 3. Social Feasibility
 
@@ -15,7 +15,6 @@
     We plan to make our system open source, so that teachers can customize it to fit their needs. As well as providing thourough doccumentation and manuals to help teachers get started.
     Overall, our autograding system has the potential to greatly benefit teachers, students and schools, and we are committed to making it as user-friendly and accessible as possible.
 
-
 4. Economic Feasibility
 
     The economic benefits of our autograding system for teachers and the school are numerous.
@@ -25,4 +24,3 @@
     Becuase this is a student project, we are not looking to make a profit, but rather to provide a useful tool for teachers and schools.
     This allows us to focus our efforts on creating the best product for our users, rather than on making money.
     Overall, our autograding system can help teachers be more efficient and effective in their work, ultimately benefiting teachers, students and schools.
-
