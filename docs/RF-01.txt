@@ -1,26 +1,35 @@
 1. Product
-CodeCowboy is intended to be a small-scale program which can be run locally and used by teachers at IUS. It is meant to not rely on any external sources such as AWS as well. The main functionality of the program is to run test cases on student-submitted code using GitHub Classroom. It is designed to best suite the needs of the computer science department at IUS. It is also meant to be easy to implement and maintain.
+
+CodeCowboy intends to be a small-scale program that can be run locally and used by teachers at IUS. It is meant to not rely on any external sources such as AWS as well. The main functionality of the program is to run test cases on student-submitted code using GitHub Classroom and produce an output of each student's grades to be imported into Canvas. It is designed to suit the needs of the Computer Science department at IUS. The project is also meant to be easy to implement and maintain, for the future owners of CodeCowboy.
 
 2. Technical Feasibility
-The expectations placed on the CodeCowboys are reasonable and feasible. The skill level of our team will be adequate for us to be able to get the project into a working, deployable state. CodeCowboy is currently completely written in GO and heavily utilizes the GitHub API. It will be designed to run primarily on mac devices, but will likely support other environments as well. 
+
+The expectations placed on the CodeCowboys are reasonable and feasible. The skill level of our team will be adequate for us to get the project into a working, deployable state. CodeCowboy is currently completely written in Go and heavily utilizes the GitHub API. It will be designed to run primarily on Mac devices, but will likely support other environments as well. 
 
 3. Social Feasibility
 
-    Our autograding system has the potential to greatly benefit teachers, students and schools.
-    Teachers will be able to save time and effort on grading assignments, allowing them to focus on other important tasks.
-    Students will receive quicker feedback on their work, which can help them improve their performance.
-    One of the main goals for our project is to expand on the current autograding system, while maintaining simplicity and ease of use.
-    Part of our planned improvments to the auto-grader include better, more user friendly interfaces that dont require additional teacher training.
-    Our program integrates with canvas and github classroom, which are already widely used in schools, making it easy for teachers to adopt our product.
-    We plan to make our system open source, so that teachers can customize it to fit their needs. As well as providing thourough doccumentation and manuals to help teachers get started.
-    Overall, our autograding system has the potential to greatly benefit teachers, students and schools, and we are committed to making it as user-friendly and accessible as possible.
+Our auto-grading system has the potential to greatly benefit teachers, students, and schools. Teachers will be able to save time and effort on grading assignments, allowing them to focus on other important tasks. Students will receive quicker feedback on their work, which can help them improve their performance. One of the main goals of our project is to expand on the current auto-grading system while maintaining simplicity and ease of use. Part of our planned improvements to the auto-grader includes better, more user-friendly interfaces that don't require additional teacher training. Our program integrates with Canvas and GitHub Classroom, which are already widely used in schools, making it easy for teachers to adopt our product. We plan to make our system open source so that teachers can customize it to fit their needs, as well as provide thorough documentation and manuals to help teachers get started. Overall, our auto-grading system has the potential to greatly benefit teachers, students, and schools, and we are committed to making it as user-friendly and accessible as possible.
 
 4. Economic Feasibility
 
-    The economic benefits of our autograding system for teachers and the school are numerous.
-    The time and effort required for grading assignments is greatly reduced, allowing teachers to spend more time on other important tasks, such as teaching, lesson planning and student support.
-    More efficient grading for teachers is much more cost effective than hiring additional staff to help with grading or paying for more expensive grading software.
-    The cost of implementing our system is relatively low compared to the potential benefits and to other alternative grading systems, as our system is ran off local servers rather than costly cloud services.
-    Becuase this is a student project, we are not looking to make a profit, but rather to provide a useful tool for teachers and schools.
-    This allows us to focus our efforts on creating the best product for our users, rather than on making money.
-    Overall, our autograding system can help teachers be more efficient and effective in their work, ultimately benefiting teachers, students and schools.
+The economic benefits of our auto-grading system for teachers and the school are numerous. The time and effort required for grading assignments are greatly reduced, allowing teachers to spend more time on other important tasks, such as teaching, lesson planning, and student support. More efficient grading for teachers is much more cost-effective than hiring additional staff to help with grading or paying for more expensive grading software. The cost of implementing our system is relatively low compared to the potential benefits and other alternative grading systems, as our system is running off local servers rather than costly cloud services. Because this is a student project, we are not looking to make a profit, but rather to provide a useful tool for teachers and schools. This allows us to focus our efforts on creating the best product for our users, rather than on making money. Overall, our auto-grading system can help teachers be more efficient and effective in their work, ultimately benefiting teachers, students, and schools.
+
+5. Market Research
+
+First, the biggest driver for the market need for an auto-grader is from the IUS Computer Science department. In particular, Professor Chris Sexton needs a program that will run students' code against predefined tests for each assignment and produce a set of Canvas grades to be directly imported into a course. Novak and Kermek in Education Sciences (https://www.mdpi.com/2227-7102/14/1/54) highlight the need for an improved grading system for programming assignments. They state that it can take up to an hour per student to grade a complex programming assignment.
+
+Our potential customer base for this project is any professor or teacher who teaches a programming course with unit tests and is required to run students' code against their tests automatically, providing a graded output.
+
+Our product will be a simple but powerful tool that can be run locally and locally configured to automatically generate grade outputs for Canvas, providing deep integration with existing services that instructors use, providing a benefit to other auto-grading solutions like codePost and GitHub's auto grader.
+
+6. Alternative Solution
+
+Apart from the other market solutions, there are a couple of alternative directions that this project could've headed. One alternative for this project is to integrate with an existing service like AWS for hosting and code-running. This solution was tried in previous iterations of the project, but this adds an extra overhead in cost and code maintenance, which are both things that cannot be afforded. This project is meant to be a simple solution to autograding, with very low maintenance for the next code owner (Professor Sexton).
+
+Another possible direction that our project could have gone is recreating the auto grader project as a standalone desktop application with its GUI. The current solution allows the project to be run locally on the command line, or to host the autograder on a website. First, we want to ensure we can add as much functionality to this project as possible, which is only possible if we reuse the code already provided to us, and continue the project in its current direction. The project is also meant to be simple to use, which both a CLI tool and a website allow. The grading workflow when using the CLI can always remain the same, and a user doesn't have to download the program and learn a new GUI if they don't want to. However, we can also allow users to simply navigate to the webpage and use a GUI if they need to.
+
+7. Project Risks
+
+The biggest risk in this project is the potential for the project to be taken in a direction that is not useful for the customer. As students, we are given free rein over the project and can, for the most part, take the project in any direction that we wish. However, this might become a problem if we were to start adding complex functionality that is unrequired. To mitigate this, we plan to meet with our "product owner" (sponsor), Professor Sexton, to ensure that we are taking the project in a direction that he finds useful.
+
+Another potential risk is that the project is developed in a way that is not minimally maintainable. If we start to take the project in a direction that requires constant maintenance, as the previous AWS solution does, then the project will likely be completely abandoned and not at all useful after we have finished our part with it. To mitigate this, we will strongly consider the simplicity and maintainability of the code that we are writing, to ensure that the next owner (likely Professor Sexton) can make any updates that need to be made without constant maintenance from an entire software team. The meetings with Professor Sexton will also help in mitigating this maintainability issue.
