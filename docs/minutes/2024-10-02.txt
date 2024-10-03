@@ -1,0 +1,10 @@
+2024-10-02 Minutes:
+5:00pm-6:00pm
+
+First, we briefly went over the outline for RF-2. We then divvied up the assignment for each of our team members.
+
+Andrew Collins will be responsible for the cover page, the breakdown of individual contributions, and the key personnel information. He will also cover the introduction through user interfaces.
+
+Garrison Creek will cover from hardware interfaces through constraints, assumptions, and dependencies.
+
+Dale Spencer will cover all of the specific requirements.
