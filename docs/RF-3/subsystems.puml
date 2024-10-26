@@ -1,0 +1,32 @@
+@startuml
+object "User Interface Subsystem" as UI {
+Provides CLI and Web Interface for users
+}
+
+object "Assignment Management Subsystem" as AMS {
+Organizes classrooms and manages assignment flow to test runner
+}
+
+object "Testing and Grading Subsystem" as TGS {
+Runs tests on student code, assigns grades, and handles errors
+}
+
+object "GitHub Classroom (External)" as GH {
+Stores assignment templates, unit tests, and student submissions
+}
+
+object "Results Management Subsystem" as RMS {
+Formats grades for Canvas and exports results
+}
+
+object "Canvas LMS (External)" as LMS {
+    Holds student grades
+}
+
+UI --> AMS : "User interaction"
+AMS --> GH : "Syncs student code"
+AMS --> TGS : "Sends assignments for testing"
+TGS --> RMS : "Processes grade results"
+RMS --> LMS : "Publishes grades to Canvas"
+
+@enduml

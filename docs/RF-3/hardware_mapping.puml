@@ -1,0 +1,37 @@
+@startuml
+' Define nodes
+node "User's Machine" as UserMachine {
+    object "Command Line Interface\n(CLI)" as CLI
+    object "Web Interface" as WebUI
+}
+
+node "Server" as Server {
+    object "CodeCowboy\nApplication" as CodeCowboy
+    object "Testing and Grading\nSubsystem" as TestingGrading
+    object "Assignment Management\nSubsystem" as AssignmentManagement
+    object "Results Management\nSubsystem" as ResultsManagement
+}
+
+node "GitHub Classroom" as GitHub {
+    object "GitHub API" as GitHubAPI
+}
+
+node "Canvas LMS" as Canvas {
+    object "Canvas input" as CanvasAPI
+}
+
+' Define connections
+UserMachine -down-> CLI
+UserMachine -down-> WebUI
+
+CLI --> Server : "User runs local server"
+WebUI --> CodeCowboy
+
+CodeCowboy --> TestingGrading
+CodeCowboy --> AssignmentManagement
+TestingGrading --> ResultsManagement
+
+AssignmentManagement --> GitHubAPI
+ResultsManagement --> CanvasAPI
+
+@enduml
