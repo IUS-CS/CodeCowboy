@@ -1,0 +1,25 @@
+@startuml
+left to right direction
+
+rectangle "Input Phase" as Input {
+    object "Add Classes, Assignments, and Tests" as Add
+    object "Submitted Assignments" as Submit
+}
+
+rectangle "Processing Phase" as Processing {
+    object "Run Tests on Submissions" as RunTests
+    object "Generate Grades" as GenerateGrades
+}
+
+rectangle "Output Phase" as Output {
+    object "Export Grades to Canvas" as ExportGrades
+    object "Grades Accessible" as GradesAccessible
+}
+
+Add --> RunTests
+Submit --> RunTests
+RunTests --> GenerateGrades
+GenerateGrades --> ExportGrades
+ExportGrades --> GradesAccessible
+
+@enduml

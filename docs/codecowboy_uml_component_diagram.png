@@ -1,0 +1,29 @@
+// CodeCowboy Subsystems UML Component Diagram
+digraph {
+	rankdir=LR size=50
+	UI [label="User Interface Subsystem
+(CLI, Web UI)"]
+	AUTH [label="Authentication Subsystem
+(User Login, Session Management)"]
+	ASSIGN [label="Assignment Management Subsystem
+(GitHub API Connector, Assignment Template Manager)"]
+	TEST [label="Testing & Grading Subsystem
+(Unit Test Runner, Error Handler, Grader)"]
+	RESULT [label="Result Management Subsystem
+(Result Formatter, Canvas Integration)"]
+	STORAGE [label="Database / Storage Subsystem
+(Local/GitHub Storage Connector)"]
+	COMM [label="Communication Subsystem
+(HTTP/HTTPS Connector)"]
+	UI -> AUTH [label=authenticates]
+	UI -> ASSIGN [label="interacts with"]
+	UI -> RESULT [label="displays results"]
+	AUTH -> COMM [label=communicates]
+	ASSIGN -> COMM [label="API interactions"]
+	ASSIGN -> TEST [label="sends code for testing"]
+	TEST -> RESULT [label="passes grading results"]
+	RESULT -> STORAGE [label="stores results"]
+	RESULT -> COMM [label="uploads to Canvas"]
+	ASSIGN -> STORAGE [label="saves assignments"]
+	STORAGE -> COMM [label="backup & sync"]
+}
