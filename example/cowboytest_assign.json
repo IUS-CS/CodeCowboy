@@ -1,17 +1,17 @@
 [
 	{
 		"Name": "Assignment1",
-		"Course": "cowboytest",
+		"Course": "CodeCowboyTest-SP25",
 		"Type": "go"
 	},
 	{
 		"Name": "Assignment2",
-		"Course": "cowboytest",
+		"Course": "CodeCowboyTest-SP25",
 		"Type": "java"
 	},
 	{
-	  "Name": "Assignment3",
-	  "Course": "cowboytest",
-	  "Type": "net"
+		"Name": "Assignment3",
+		"Course": "CodeCowboyTest-SP25",
+		"Type": "net"
 	}
 ]
