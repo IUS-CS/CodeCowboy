@@ -70,6 +70,7 @@ templ (w *Web) listExecutions(course, assignment string, executions map[string]s
     if len(executions) > 0 {
         <div>
         <h2>Executions</h2>
+        // TODO: UUID is a weird thing to use for this.. executions start jumping around and getting unordered.
         for id, status := range executions {
             if status == STATUS_RUNNING {
                 { id }: Running
@@ -80,6 +81,7 @@ templ (w *Web) listExecutions(course, assignment string, executions map[string]s
                             course, assignment, id) }
                             hx-target="#resultView">view</a>)
             }
+            <br/>
         }
         </div>
     }

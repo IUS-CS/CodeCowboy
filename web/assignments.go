@@ -129,6 +129,7 @@ func (w *Web) handleRunAssignment(wr http.ResponseWriter, r *http.Request) {
 		w.renderErr(r.Context(), wr, err)
 		return
 	}
+	// TODO: UUID is a weird thing to use for this.. executions start jumping around and getting unordered.
 	id := uuid.New().String()
 	for _, a := range cls.Assignments {
 		if a.Name == assignment {
@@ -155,7 +156,6 @@ func (w *Web) handleRunAssignment(wr http.ResponseWriter, r *http.Request) {
 			wr.Header().Set("HX-Location", "/courses/"+cls.Name+"/assignments/"+assignment)
 			return
 		}
-		return
 	}
 	w.renderErr(r.Context(), wr, fmt.Errorf("handleRunAssignment could not find assignment"))
 }

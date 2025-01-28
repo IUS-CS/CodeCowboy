@@ -100,7 +100,8 @@ func (a AssignmentSpec) Validate() error {
 	return errors.Join(errs...)
 }
 
-var cloner = `gh classroom clone student-repos -d "%s" -a $(gh classroom assignments -c $(gh classroom list | tail -n +4 | grep "%s" | cut -w -f1)|tail -n +4 | grep "%s" | cut -w -f1)`
+// TODO: Relying on CLI output is a really bad idea. Switch to API for reliable querying...
+var cloner = `gh classroom clone student-repos -d "%s" -a $(gh classroom assignments -c $(gh classroom list | grep "%s" | cut -w -f1)|tail -n +4 | grep "%s" | cut -w -f1)`
 var assignmentName = `gh classroom assignments -c $(gh classroom list | tail -n +4 | grep "%s" | cut -w -f1)|tail -n +4 | grep "%s" | cut -w -f2`
 
 func stripDanger(input string) string {
@@ -164,6 +165,9 @@ func (a AssignmentSpec) Clone() (string, string, error) {
 	fmtCmd := fmt.Sprintf(cloner, tmpPath, stripDanger(a.Course), stripDanger(a.Name))
 	log.Debugf("Running command: %s", fmtCmd)
 	cmd := exec.Command("/bin/sh", "-c", fmtCmd)
+
+	// TODO: if this errors out, the user is never notified.
+	// may error if gh classroom extension isn't installed
 	if err := cmd.Run(); err != nil {
 		return errReturn(err)
 	}
