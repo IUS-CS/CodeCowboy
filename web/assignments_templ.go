@@ -377,7 +377,7 @@ func (w *Web) listExecutions(course, assignment string, executions map[string]st
 					var templ_7745c5c3_Var22 string
 					templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(id)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/assignments.templ`, Line: 75, Col: 20}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/assignments.templ`, Line: 76, Col: 20}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 					if templ_7745c5c3_Err != nil {
@@ -405,7 +405,7 @@ func (w *Web) listExecutions(course, assignment string, executions map[string]st
 					var templ_7745c5c3_Var24 string
 					templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(id)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/assignments.templ`, Line: 78, Col: 51}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/assignments.templ`, Line: 79, Col: 51}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 					if templ_7745c5c3_Err != nil {
@@ -419,7 +419,7 @@ func (w *Web) listExecutions(course, assignment string, executions map[string]st
 					templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/courses/%s/assignments/%s/view/%s",
 						course, assignment, id))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/assignments.templ`, Line: 80, Col: 51}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/assignments.templ`, Line: 81, Col: 51}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 					if templ_7745c5c3_Err != nil {
@@ -476,7 +476,7 @@ func (w *Web) newAssignmentForm(courseName string) templ.Component {
 		var templ_7745c5c3_Var27 string
 		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/courses/%s/assignments", courseName))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/assignments.templ`, Line: 92, Col: 68}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/assignments.templ`, Line: 93, Col: 68}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {
@@ -489,7 +489,7 @@ func (w *Web) newAssignmentForm(courseName string) templ.Component {
 		var templ_7745c5c3_Var28 string
 		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(classroom.DEFAULT_EXPR)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/assignments.templ`, Line: 104, Col: 90}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/assignments.templ`, Line: 105, Col: 90}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 		if templ_7745c5c3_Err != nil {
