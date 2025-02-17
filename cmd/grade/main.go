@@ -11,7 +11,7 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-const DBNAME = "codecowboy"
+const DBNAME = "codecowboy.db"
 
 var (
 	course     = flag.String("course", "", "Course to grade")
