@@ -8,13 +8,14 @@ import (
 	"cso/codecowboy/graders/net"
 	"cso/codecowboy/store"
 	"fmt"
-	"github.com/charmbracelet/log"
-	"github.com/go-chi/chi/v5"
-	"github.com/google/uuid"
 	"io"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/charmbracelet/log"
+	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 )
 
 const STATUS_RUNNING = "running"
@@ -25,6 +26,7 @@ func (w *Web) setupAssignmentHandlers() chi.Router {
 	router.Get("/newAssignment", w.handleNewAssignmentForm)
 	router.Get("/{assignment}", w.handleAssignmentDetails)
 	router.Delete("/{assignment}", w.handleRmAssignment)
+	router.Post("/runAll", w.handleRunAllAssignments)
 	router.Post("/{assignment}/run", w.handleRunAssignment)
 	router.Get("/{assignment}/download/{id}", w.handleDownloadResult)
 	router.Get("/{assignment}/view/{id}", w.handleViewResult)
@@ -158,6 +160,53 @@ func (w *Web) handleRunAssignment(wr http.ResponseWriter, r *http.Request) {
 		}
 	}
 	w.renderErr(r.Context(), wr, fmt.Errorf("handleRunAssignment could not find assignment"))
+}
+
+// Runs all the assignments for a course sequentially
+func (w *Web) handleRunAllAssignments(wr http.ResponseWriter, r *http.Request) {
+	course := chi.URLParam(r, "course")
+	cls, err := classroom.New(w.db, course)
+	if err != nil {
+		w.renderErr(r.Context(), wr, err)
+		return
+	}
+
+    done := make(chan bool)
+	id_list := []string{}
+	go func() {
+		for _, a := range cls.Assignments {
+			id := uuid.New().String()
+			id_list = append(id_list, id)
+			rawDueDate := r.FormValue("duedate")
+			dueDate, err := time.Parse(time.DateTime, rawDueDate)
+			if err != nil {
+				dueDate = time.Now()
+			}
+
+			if _, ok := w.runLog[course+a.Name]; !ok {
+					w.runLog[course+a.Name] = map[string]string{}
+				}
+			w.runLog[course+a.Name][id] = STATUS_RUNNING
+
+			wd, _ := os.Getwd()
+			tmpDir, assnPath, err := a.Clone()
+			defer a.Cleanup(wd, tmpDir)
+
+			a.Path = assnPath
+			out, err := run(w.db, a, dueDate)
+
+			if err != nil {
+				w.runLog[course+a.Name][id] = err.Error()
+			} else {
+				w.runLog[course+a.Name][id] = out
+			}
+		}
+		done <- true
+	}()
+	<-done
+
+    wr.Header().Set("Content-Type", "text/html")
+	wr.Write([]byte(`<span id="run-all-status">Complete</span>`)) // TODO: link to results file
 }
 
 func (w *Web) handleExecutionList(wr http.ResponseWriter, r *http.Request) {

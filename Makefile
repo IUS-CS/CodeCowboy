@@ -6,4 +6,7 @@ generate:
 server: generate
 	go build -o server cmd/web/main.go
 
-@PHONY: server generate
+run: all
+	./server
+
+@PHONY: server generate run
