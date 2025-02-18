@@ -172,9 +172,11 @@ func (w *Web) handleRunAllAssignments(wr http.ResponseWriter, r *http.Request) {
 	}
 
     done := make(chan bool)
+	id_list := []string{}
 	go func() {
 		for _, a := range cls.Assignments {
 			id := uuid.New().String()
+			id_list = append(id_list, id)
 			rawDueDate := r.FormValue("duedate")
 			dueDate, err := time.Parse(time.DateTime, rawDueDate)
 			if err != nil {
@@ -204,9 +206,7 @@ func (w *Web) handleRunAllAssignments(wr http.ResponseWriter, r *http.Request) {
 	<-done
 
     wr.Header().Set("Content-Type", "text/html")
-	wr.Write([]byte(`<span id="run-all-status">Complete</span>`))
-
-    // wr.Write([]byte(`<span id="run-all-status">Complete (<a href="/path/to/results">View Results</a>)</span>`)) // TODO: Add link to results
+	wr.Write([]byte(`<span id="run-all-status">Complete</span>`)) // TODO: link to results file
 }
 
 func (w *Web) handleExecutionList(wr http.ResponseWriter, r *http.Request) {

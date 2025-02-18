@@ -148,7 +148,7 @@ func errReturn(err error) (string, string, error) {
 	return "", "", err
 }
 
-func (a AssignmentSpec) Clone() (string, string, error) {
+func (a AssignmentSpec) Clone() (string, string, error) { // TODO: This may be causing errors, look into this
 	if err := a.Validate(); err != nil {
 		return errReturn(err)
 	}
