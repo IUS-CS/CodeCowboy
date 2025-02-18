@@ -5,11 +5,13 @@ import (
 	"cso/codecowboy/graders"
 	"cso/codecowboy/store"
 	"flag"
-	"github.com/charmbracelet/log"
 	"os"
+	"time"
+
+	"github.com/charmbracelet/log"
 )
 
-const DBNAME = "codecowboy"
+const DBNAME = "codecowboy.db"
 
 var (
 	course     = flag.String("course", "", "Course to grade")
@@ -47,11 +49,13 @@ func main() {
 		checkErr(err)
 	}
 
+	// TODO: temporarily adding time.now() to due date.
+	// should this be a cli argument?
 	checkErr(grader.Grade(classroom.AssignmentSpec{
 		Name:   *assignment,
 		Path:   *dir,
 		Course: *course,
-	}, w))
+	}, time.Now(), w))
 }
 
 func checkErr(err error) {

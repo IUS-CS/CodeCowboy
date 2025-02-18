@@ -29,7 +29,7 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 	}
 
-	db, err := store.New(*dbPath, DBNAME)
+	db, err := store.New(*dbPath)
 	if err != nil {
 		log.Fatal("store.New", err)
 	}

@@ -21,7 +21,7 @@ func CopyExtras(from string, to string) error {
 		return err
 	}
 	for _, entry := range d {
-		err = cp.Copy(path.Join(from, entry.Name()), to)
+		err = cp.Copy(path.Join(from, entry.Name()), path.Join(to, entry.Name()))
 		if err != nil {
 			return err
 		}
@@ -62,7 +62,7 @@ func Grade(db *store.DB, command []string, spec classroom.AssignmentSpec, dueDat
 		}
 
 		if spec.ExtrasSrc != "" {
-			err := CopyExtras(spec.ExtrasSrc, path.Join(getwd, spec.ExtrasDst))
+			err := CopyExtras(spec.ExtrasSrc, path.Join(getwd, d.Name(), spec.ExtrasDst))
 			if err != nil {
 				return err
 			}
