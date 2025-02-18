@@ -9,4 +9,7 @@ server: generate
 test: 
 	go test -v ./... | grep -v '\[no test files\]' 
 
-@PHONY: server generate
+run: all
+	./server
+
+@PHONY: server generate run

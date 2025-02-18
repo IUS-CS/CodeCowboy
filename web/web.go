@@ -2,12 +2,13 @@ package web
 
 import (
 	"context"
-	"github.com/charmbracelet/log"
-	"github.com/go-chi/chi/v5/middleware"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/charmbracelet/log"
+	"github.com/go-chi/chi/v5/middleware"
 
 	"cso/codecowboy/store"
 
