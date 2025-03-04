@@ -171,12 +171,14 @@ func (w *Web) handleRunAllAssignments(wr http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-    done := make(chan bool)
-	id_list := []string{}
+	done := make(chan bool)
+	idToAssignment := make(map[string]string) // Store assignment names per ID
+
 	go func() {
 		for _, a := range cls.Assignments {
 			id := uuid.New().String()
-			id_list = append(id_list, id)
+			idToAssignment[id] = a.Name // Store assignment name for this run
+
 			rawDueDate := r.FormValue("duedate")
 			dueDate, err := time.Parse(time.DateTime, rawDueDate)
 			if err != nil {
@@ -184,8 +186,8 @@ func (w *Web) handleRunAllAssignments(wr http.ResponseWriter, r *http.Request) {
 			}
 
 			if _, ok := w.runLog[course+a.Name]; !ok {
-					w.runLog[course+a.Name] = map[string]string{}
-				}
+				w.runLog[course+a.Name] = map[string]string{}
+			}
 			w.runLog[course+a.Name][id] = STATUS_RUNNING
 
 			wd, _ := os.Getwd()
@@ -205,7 +207,7 @@ func (w *Web) handleRunAllAssignments(wr http.ResponseWriter, r *http.Request) {
 	}()
 	<-done
 
-    wr.Header().Set("Content-Type", "text/html")
+	wr.Header().Set("Content-Type", "text/html")
 	wr.Write([]byte(`<span id="run-all-status">Complete</span>`)) // TODO: link to results file
 }
 
