@@ -131,11 +131,14 @@ func (w *Web) handleRunAssignment(wr http.ResponseWriter, r *http.Request) {
 		w.renderErr(r.Context(), wr, err)
 		return
 	}
-	// TODO: UUID is a weird thing to use for this.. executions start jumping around and getting unordered.
+
 	id := uuid.New().String()
 	for _, a := range cls.Assignments {
 		if a.Name == assignment {
 			go func() {
+				w.mu.Lock() // Locks mutex to ensure sequential execution
+				defer w.mu.Unlock() // Unlocks after execution
+
 				if _, ok := w.runLog[course+assignment]; !ok {
 					w.runLog[course+assignment] = map[string]string{}
 				}
@@ -146,7 +149,6 @@ func (w *Web) handleRunAssignment(wr http.ResponseWriter, r *http.Request) {
 				defer a.Cleanup(wd, tmpDir)
 
 				a.Path = assnPath
-
 				out, err := run(w.db, a, dueDate)
 
 				if err != nil {
@@ -171,12 +173,14 @@ func (w *Web) handleRunAllAssignments(wr http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-    done := make(chan bool)
-	id_list := []string{}
+	done := make(chan bool)
+	idToAssignment := make(map[string]string) // Store assignment names per ID
+
 	go func() {
 		for _, a := range cls.Assignments {
 			id := uuid.New().String()
-			id_list = append(id_list, id)
+			idToAssignment[id] = a.Name // Store assignment name for this run
+
 			rawDueDate := r.FormValue("duedate")
 			dueDate, err := time.Parse(time.DateTime, rawDueDate)
 			if err != nil {
@@ -184,8 +188,8 @@ func (w *Web) handleRunAllAssignments(wr http.ResponseWriter, r *http.Request) {
 			}
 
 			if _, ok := w.runLog[course+a.Name]; !ok {
-					w.runLog[course+a.Name] = map[string]string{}
-				}
+				w.runLog[course+a.Name] = map[string]string{}
+			}
 			w.runLog[course+a.Name][id] = STATUS_RUNNING
 
 			wd, _ := os.Getwd()
@@ -205,7 +209,7 @@ func (w *Web) handleRunAllAssignments(wr http.ResponseWriter, r *http.Request) {
 	}()
 	<-done
 
-    wr.Header().Set("Content-Type", "text/html")
+	wr.Header().Set("Content-Type", "text/html")
 	wr.Write([]byte(`<span id="run-all-status">Complete</span>`)) // TODO: link to results file
 }
 

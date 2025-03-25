@@ -9,16 +9,16 @@ import (
 templ (w *Web) assignmentList(course *classroom.Course) {
     <div id="assignmentList">
 
-    <button id="run-all-btn" style="padding: 5px; margin-bottom: 20px;" hx-post={ fmt.Sprintf("/courses/"+course.Name+"/assignments/runAll") } hx-trigger="click" hx-target="#run-all-status" hx-swap="outerHTML">Run All Assignments</button>
-    <span id="run-all-status"></span>
-
-    <script>
-    document.getElementById('run-all-btn').addEventListener('click', function() {
-        document.getElementById('run-all-status').innerHTML = 'Running...';
-    });
-    </script>
-
         <ul style="list-style: none">
+            <li>
+                <button id="run-all-btn" style="padding: 5px;" hx-post={ fmt.Sprintf("/courses/"+course.Name+"/assignments/runAll") } hx-trigger="click" hx-target="#run-all-status" hx-swap="outerHTML">Run All Assignments</button>
+                <span id="run-all-status"></span>
+                <script>
+                    document.getElementById('run-all-btn').addEventListener('click', function() {
+                        document.getElementById('run-all-status').innerHTML = 'Running...';
+                    });
+                </script>
+            </li>
             for _, a := range course.Assignments {
                 <li>
                     <button style="padding: 5px" hx-post={ fmt.Sprintf("/courses/"+course.Name+"/assignments/"+a.Name+"/run") }>Run</button>
