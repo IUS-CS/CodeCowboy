@@ -131,11 +131,14 @@ func (w *Web) handleRunAssignment(wr http.ResponseWriter, r *http.Request) {
 		w.renderErr(r.Context(), wr, err)
 		return
 	}
-	// TODO: UUID is a weird thing to use for this.. executions start jumping around and getting unordered.
+
 	id := uuid.New().String()
 	for _, a := range cls.Assignments {
 		if a.Name == assignment {
 			go func() {
+				w.mu.Lock() // Locks mutex to ensure sequential execution
+				defer w.mu.Unlock() // Unlocks after execution
+
 				if _, ok := w.runLog[course+assignment]; !ok {
 					w.runLog[course+assignment] = map[string]string{}
 				}
@@ -146,7 +149,6 @@ func (w *Web) handleRunAssignment(wr http.ResponseWriter, r *http.Request) {
 				defer a.Cleanup(wd, tmpDir)
 
 				a.Path = assnPath
-
 				out, err := run(w.db, a, dueDate)
 
 				if err != nil {

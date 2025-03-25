@@ -77,7 +77,7 @@ Flags:
 - `course`: The database identifier for your course/student roster
 - `assignment`: The assignment name for Canvas import
   - Include your ID in this in parens, e.g. "Assignment 1 (ID HERE)"
-- `type`: Language we are grading 
+- `type`: Language we are grading
   - Supports .NET, Java, and Go
 
 Example:

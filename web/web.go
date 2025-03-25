@@ -13,6 +13,8 @@ import (
 	"cso/codecowboy/store"
 
 	"github.com/go-chi/chi/v5"
+
+	"sync"
 )
 
 type Web struct {
@@ -20,6 +22,7 @@ type Web struct {
 	db         *store.DB
 
 	runLog map[string]map[string]string
+	mu     sync.Mutex // Adding Mutex to protect runLog
 }
 
 func New(db *store.DB, listenAddr string) *Web {
