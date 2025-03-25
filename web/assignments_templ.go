@@ -35,20 +35,20 @@ func (w *Web) assignmentList(course *classroom.Course) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"assignmentList\"><button id=\"run-all-btn\" style=\"padding: 5px; margin-bottom: 20px;\" hx-post=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"assignmentList\"><ul style=\"list-style: none\"><li><button id=\"run-all-btn\" style=\"padding: 5px;\" hx-post=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/courses/" + course.Name + "/assignments/runAll"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/assignments.templ`, Line: 12, Col: 140}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/assignments.templ`, Line: 14, Col: 131}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" hx-trigger=\"click\" hx-target=\"#run-all-status\" hx-swap=\"outerHTML\">Run All Assignments</button> <span id=\"run-all-status\"></span><script>\n    document.getElementById('run-all-btn').addEventListener('click', function() {\n        document.getElementById('run-all-status').innerHTML = 'Running...';\n    });\n    </script><ul style=\"list-style: none\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" hx-trigger=\"click\" hx-target=\"#run-all-status\" hx-swap=\"outerHTML\">Run All Assignments</button> <span id=\"run-all-status\"></span><script>\n                    document.getElementById('run-all-btn').addEventListener('click', function() {\n                        document.getElementById('run-all-status').innerHTML = 'Running...';\n                    });\n                </script></li>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
