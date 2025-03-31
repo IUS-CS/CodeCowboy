@@ -22,21 +22,27 @@ func (w *Web) setupCourseHandlers() chi.Router {
 }
 
 func (w *Web) handleCourseList(wr http.ResponseWriter, r *http.Request) {
-	courses, err := classroom.All(w.db)
+	currentUser := w.getCurrentUser(r)
+
+	courses, err := classroom.AllPermitted(w.db, currentUser)
 	if err != nil {
 		w.renderErr(r.Context(), wr, err)
 		return
 	}
-	w.Index("Courses", w.courseList(courses)).Render(r.Context(), wr)
+
+	w.Index("Courses", currentUser, w.courseList(courses)).Render(r.Context(), wr)
 }
 
 func (w *Web) handleNewCourse(wr http.ResponseWriter, r *http.Request) {
-	courses, err := classroom.All(w.db)
+	currentUser := w.getCurrentUser(r)
+
+	courses, err := classroom.AllPermitted(w.db, currentUser)
 	if err != nil {
 		w.renderErr(r.Context(), wr, err)
 		return
 	}
-	w.Index("New Course", w.courseList(courses)).Render(r.Context(), wr)
+
+	w.Index("New Course", currentUser, w.courseList(courses)).Render(r.Context(), wr)
 }
 
 func (w *Web) handleRmCourse(wr http.ResponseWriter, r *http.Request) {
@@ -55,5 +61,6 @@ func (w *Web) handleCourseDetails(wr http.ResponseWriter, r *http.Request) {
 		w.renderErr(r.Context(), wr, err)
 		return
 	}
-	w.Index(courseName, w.courseDetails(course)).Render(r.Context(), wr)
+	currentUser := w.getCurrentUser(r)
+	w.Index(courseName, currentUser, w.courseDetails(course)).Render(r.Context(), wr)
 }

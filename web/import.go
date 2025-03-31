@@ -21,7 +21,8 @@ func (w *Web) setupImportHandlers() chi.Router {
 }
 
 func (w *Web) handleImportRoot(wr http.ResponseWriter, r *http.Request) {
-	w.Index("Import", w.importForm()).Render(r.Context(), wr)
+	currentUser := w.getCurrentUser(r)
+	w.Index("Import", currentUser, w.importForm()).Render(r.Context(), wr)
 }
 
 func (w *Web) handleImportData(wr http.ResponseWriter, r *http.Request) {
@@ -70,6 +71,10 @@ func (w *Web) handleImportData(wr http.ResponseWriter, r *http.Request) {
 		}
 	}
 	cls.Students = roster
+
+	currentUser := w.getCurrentUser(r)
+	cls.Instructors = []string{currentUser}
+
 	err = cls.Save()
 	if err != nil {
 		w.renderErr(r.Context(), wr, err)

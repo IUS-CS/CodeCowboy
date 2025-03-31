@@ -32,13 +32,13 @@ templ (w *Web) Footer() {
     <script src="/static/htmx.min.js"></script>
 }
 
-templ (w *Web) Index(title string, contents templ.Component) {
+templ (w *Web) Index(title string, currentUser string, contents templ.Component) {
     <!DOCTYPE html>
     <html lang="en" class="no-js">
     @w.Header( title)
     <body>
 
-    @w.Nav( title)
+    @w.Nav( title, currentUser)
 
     <main>
     <div class="container" id="container">
@@ -56,11 +56,16 @@ templ (w *Web) Index(title string, contents templ.Component) {
     </html>
 }
 
-templ (w *Web) Nav(currentPage string) {
+templ (w *Web) Nav(currentPage string, currentUser string) {
     <header>
     <nav style="margin-right: 2em; margin-left: 2em">
       <ul>
         <li><strong><a href="/" class="navTitle">{ w.SiteName() }</a></strong></li>
+      </ul>
+      <ul>
+        <li>
+        @w.SelectUser(currentUser)
+        </li>
       </ul>
       <ul>
         for _, item := range w.Navs() {
@@ -75,6 +80,31 @@ templ (w *Web) Nav(currentPage string) {
       </ul>
     </nav>
     </header>
+}
+
+templ (w *Web) SelectUser(currentUser string) {
+    <select
+    hx-get="/set-user"
+    hx-trigger="change"
+    hx-swap="none"
+    hx-on::after-request="window.location.reload()"
+    name="user">
+    
+    if currentUser == "" {
+        <option selected disabled value="">Select User</option>
+    } else {
+        <option disabled value="">Select User</option>
+    }
+
+    for _, user := range w.Users() {
+        if user == currentUser {
+            <option selected value={ user }>{ user }</option>
+        } else {
+            <option value={ user }>{ user }</option>
+        }
+    }
+    </select>
+
 }
 
 templ (w *Web) Error(reason string) {

@@ -46,6 +46,37 @@ func (w *Web) Navs() []NavItem {
 	}
 }
 
+func (w *Web) handleSetUser(wr http.ResponseWriter, r *http.Request) {
+	user := r.URL.Query().Get("user")
+
+	cookie := &http.Cookie{
+		Name:  "user",
+		Value: user,
+		Path:  "/",
+	}
+	log.Info("Setting user", "user", user)
+	http.SetCookie(wr, cookie)
+
+	wr.Write([]byte(user))
+}
+
+func (w *Web) getCurrentUser(r *http.Request) string {
+	cookie, err := r.Cookie("user")
+	if err != nil {
+		return ""
+	}
+	return cookie.Value
+}
+
+func (w *Web) handleGetUser(wr http.ResponseWriter, r *http.Request) {
+	user := w.getCurrentUser(r)
+	wr.Write([]byte(user))
+}
+
+func (w *Web) Users() []string {
+	return []string{"andrew", "dale"}
+}
+
 func (w *Web) ListenAndServe() error {
 	router := chi.NewRouter()
 
@@ -58,6 +89,9 @@ func (w *Web) ListenAndServe() error {
 	router.Mount("/import", w.setupImportHandlers())
 	router.Mount("/courses", w.setupCourseHandlers())
 	router.Mount("/db", w.setupDBUtilHandlers())
+
+	router.Get("/set-user", w.handleSetUser)
+	router.Get("/get-user", w.handleGetUser)
 
 	workDir, _ := os.Getwd()
 	filesDir := http.Dir(filepath.Join(workDir, "static"))

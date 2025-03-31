@@ -48,13 +48,16 @@ func (w *Web) handleAssignmentDetails(wr http.ResponseWriter, r *http.Request) {
 		w.renderErr(r.Context(), wr, err)
 		return
 	}
+
+	currentUser := w.getCurrentUser(r)
+
 	for _, a := range course.Assignments {
 		log.Debugf("handleAssignmentDetails checking %s against %s", a.Name, assignmentName)
 		if a.Name == assignmentName {
 			if a.Expr == "" {
 				a.Expr = classroom.DEFAULT_EXPR
 			}
-			w.Index(assignmentName, w.assignmentDetails(a, w.runLog[courseName+assignmentName])).Render(r.Context(), wr)
+			w.Index(assignmentName, currentUser, w.assignmentDetails(a, w.runLog[courseName+assignmentName])).Render(r.Context(), wr)
 			return
 		}
 	}

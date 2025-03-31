@@ -49,5 +49,6 @@ func (w *Web) handleDBExport(wr http.ResponseWriter, r *http.Request) {
 }
 
 func (w *Web) handleDBRoot(wr http.ResponseWriter, r *http.Request) {
-	w.Index("DB Utils", w.dbUtil()).Render(r.Context(), wr)
+	currentUser := w.getCurrentUser(r)
+	w.Index("DB Utils", currentUser, w.dbUtil()).Render(r.Context(), wr)
 }
