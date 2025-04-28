@@ -27,6 +27,8 @@ templ (w *Web) courseList(courses []*classroom.Course) {
     if len(courses) == 0 {
         <p>No courses</p>
     }
+
+    <a href="/import">Create New Course</a>
 }
 
 templ (w *Web) courseDetails(course *classroom.Course) {

@@ -11,7 +11,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 
 	"cso/codecowboy/store"
-
+	
 	"github.com/go-chi/chi/v5"
 
 	"sync"
@@ -43,6 +43,7 @@ func (w *Web) Navs() []NavItem {
 		{"Courses", "/courses"},
 		{"Import", "/import"},
 		{"DB Utils", "/db"},
+		{"Help", "/help"},
 	}
 }
 
@@ -58,6 +59,7 @@ func (w *Web) ListenAndServe() error {
 	router.Mount("/import", w.setupImportHandlers())
 	router.Mount("/courses", w.setupCourseHandlers())
 	router.Mount("/db", w.setupDBUtilHandlers())
+	router.Mount("/help", w.setupHelpHandlers())
 
 	workDir, _ := os.Getwd()
 	filesDir := http.Dir(filepath.Join(workDir, "static"))
